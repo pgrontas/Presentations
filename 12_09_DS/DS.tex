@@ -1,0 +1,1224 @@
+\documentclass[handout]{beamer}
+\usepackage{amsmath,amssymb,amsthm,array}
+\usepackage{bm}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{algorithm}
+\usepackage{hyperref}
+\usepackage{algorithmic}
+\usepackage[normalem]{ulem}
+\usepackage{fontspec}
+\usepackage{numprint}
+
+\setmainfont{CMU Serif}
+\setsansfont{CMU Sans Serif}
+\newfontfamily{\greekfont}{CMU Serif}
+\newfontfamily{\greekfontsf}{CMU Sans Serif}
+
+\usetheme{Rochester}
+\usecolortheme{crane}
+ 
+\setbeamertemplate{navigation symbols}{}
+\title{Ψηφιακές Υπογραφές}
+\author{Παναγιώτης Γροντάς - Άρης Παγουρτζής}
+\date{09/12/2016}
+\defbeamertemplate*{footline}{shadow theme}
+{%
+  \leavevmode%
+  \hbox{\begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm plus1fil,rightskip=.3cm]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertframenumber\,/\,\inserttotalframenumber\hfill  (\insertshortinstitute)
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle%
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+\institute{ΕΜΠ - Κρυπτογραφία - (2016-2017)}
+
+\institute{ΕΜΠ - Κρυπτογραφία - (2016-2017)}
+ \hypersetup{
+  pdfauthor={Panagiotis Grontas},
+  pdftitle={Digital Signatures},
+  colorlinks=true,
+  urlcolor=blue,
+  linkcolor=white
+}
+
+\setlength{\columnseprule}{0.4pt}
+\begin{document}
+\newcommand{\xor}{ \oplus }
+\newcommand{\msg}{ \mathtt{M} }
+\newcommand{\KEY}{ \mathtt{K} }
+\newcommand{\CPH}{ \mathtt{C} }
+\newcommand{\keygen}{\mathtt{KeyGen}}
+\newcommand{\enc}{\mathtt{Encrypt}}
+\newcommand{\dec}{\mathtt{Decrypt}}
+\newcommand{\sign}{\mathtt{Sign}}
+\newcommand{\verify}{\mathtt{Verify}}
+\newcommand{\adv}{$\mathcal{A}$ }
+\newcommand{\Hash}{\mathcal{H} }
+\newcommand{\advb}{$\mathcal{B}$ }
+\newcommand{\chal}{$\mathcal{C}$ }
+\newcommand{\cs}{$\mathcal{CS}$}
+\newcommand{\Zed}{\mathbb{Z}} 
+\newcommand{\zns}{\mathbb{Z}^*_n}
+\newcommand{\zs}[1]{\mathbb{Z}^*_{#1}}
+
+\newcommand{\green}[1]{\textcolor{teal}{#1}}
+\newcommand{\Green}[1]{\textcolor{Teal}{#1}}
+\newcommand{\ForestGreen}[1]{\textcolor{ForestGreen}{#1}}
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\magenta}[1]{\textcolor{magenta}{#1}}
+\newcommand{\cyan}[1]{\textcolor{cyan}{#1}}
+
+\newcommand{\twopartdef}[4]
+{ 
+		\begin{cases}
+			#1 , #2 \\
+			#3 , #4
+		\end{cases} 
+}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Περιεχόμενα}
+\begin{itemize}
+\item Ορισμός - Μοντελοποίηση Ασφάλειας
+\pause
+\item Ψηφιακές Υπογραφές RSA
+\pause
+\item Επιθέσεις - Παραλλαγές
+\pause
+\item Το μοντέλο του τυχαίου μαντείου
+\pause
+\item Ψηφιακές Υπογραφές ElGamal-DSA-ECDSA
+\pause
+\item Υποδομή Δημοσίου Κλειδιού
+\pause
+\item Διαμοιρασμός Απορρήτων (Secret sharing)
+\end{itemize}
+\end{frame}
+
+\section{Εισαγωγή}
+\begin{frame}{Εισαγωγή - Το πρόβλημα}
+\begin{center}
+\includegraphics[scale=0.5]{dh-mitm.png}
+\end{center}
+\pause
+Αποφυγή MITM attacks σε DHKE
+\begin{itemize}
+\item \textbf{Ακεραιότητα}: Το μήνυμα είναι \emph{αυτό} που έστειλε ο αποστολέας
+\item \textbf{Αυθεντικοποίηση}: Το μήνυμα το έστειλε \emph{αυτός} που φαίνεται ως αποστολέας
+\end{itemize}
+\pause
+Μία λύση: MACs
+\alert{Μειονεκτήματα συμμετρικής κρυπτογραφίας}
+\end{frame}
+
+\begin{frame}{Ψηφιακές υπογραφές-Ασύμμετρα MACs}
+\begin{itemize}
+\item Ο αποστολέας (υπογράφων $S$) εκτελεί αλγόριθμο $\keygen$ και παράγει τα $(key_{sign},key_{ver})$
+\begin{itemize}
+\item Το κλειδί επαλήθευσης πρέπει να είναι δημόσιο\\
+\item Το κλειδί υπογραφής πρέπει να διατηρείται μυστικό\\
+\end{itemize}
+\item Δημοσιοποιεί το κλειδί επαλήθευσης (web site, κατάλογο)
+\pause
+\item Πριν την αποστολή 'υπογράφει το μήνυμα' (με το $key_{sign}$) παράγοντας την υπογραφή $\sigma$
+\pause
+\item Αποστέλλει το ζεύγος $(m,\sigma)$
+\begin{itemize}
+\item Η υπογραφή \emph{εξαρτάται} από το μήνυμα
+\item Η υπογραφή είναι άχρηστη χωρίς το μήνυμα
+\end{itemize}
+\pause
+\item Ο παραλήπτης (επαληθεύων $V$) ελέγχει αν η υπογραφή που έλαβε είναι έγκυρη (με το $key_{ver}$)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Πλεονεκτήματα}
+ 
+\begin{itemize}
+\item Εύκολη διανομή κλειδιού
+\pause
+\item Δημόσια Επαληθευσιμότητα
+\begin{itemize}
+\item Δεν επαληθεύει μόνο ο παραλήπτης
+\end{itemize}
+\pause
+\item Μη αποκήρυξη (non repudiation)
+\begin{itemize}
+\item Εσωτερικός αντίπαλος
+\item Ο υπογράφων δεν μπορεί να αρνηθεί τις υπογραφές του
+\end{itemize}
+\pause
+\item Επιπλέον λειτουργίες
+\begin{itemize}
+    \item Αυθεντικοποίηση χρηστών (λόγω \emph{κατοχής} του ιδιωτικού κλειδού)
+    \pause
+    \item Ανωνυμία (τυφλές υπογραφές)
+    \pause
+    \item Αντιπροσωπεία από ομάδα (ομαδικές υπογραφές)
+    \item ...
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Μειονεκτήματα}
+
+Λύσαμε το πρόβλημα \textbf{διανομής} κλειδιού
+
+Δημιουργήσαμε το πρόβλημα \textbf{αυθεντικότητας} κλειδιού
+
+\begin{itemize}
+\item \alert{Πώς είμαστε σίγουροι πως το ζεύγος κλειδιών αντιστοιχεί όντως στον $S$;}
+\pause
+\item \alert{Πώς είμαστε σίγουροι πώς το $key_{sign}$ ήταν στην κατοχή του $S$ κατά τη δημιουργία της υπογραφής;}
+\end{itemize}
+ 
+\end{frame}
+
+\begin{frame}{Ορισμός}
+\begin{block}{Σχήμα Υπογραφής}
+Μια τριάδα από αλγόριθμους
+\begin{itemize}
+\item $\keygen(1^\lambda) = (key_{sign},key_{ver})$
+\pause
+\item $\sign(key_{sign}, m) = \sigma, \quad\quad m \in \{0,1\}^*$
+\pause
+\item $\verify(key_{ver}, m, \sigma) \in \{0,1\}$
+\end{itemize}
+\end{block}
+\pause
+\begin{block}{Ορθότητα}
+$\verify(key_{ver}, m, \sign(key_{sign}, m))=1$
+\end{block}
+\pause
+\green{Έγκυρες} υπογραφές: ικανοποιούν την απαίτηση της ορθότητας
+
+\end{frame}
+
+\begin{frame}{Επιθέσεις}
+\begin{block}{Πλαστογραφία(Forgery)}
+O \adv με δεδομένα το δημόσιο κλειδί επαλήθευσης και ένα μήνυμα παράγει μια έγκυρη υπογραφή χωρίς την συμμετοχή του $S$. 
+\end{block}
+\pause
+\begin{block}{\alert{Είδη Επιθέσεων}}
+\begin{itemize}
+\item \alert{Καθολική πλαστογράφηση}: Ο \adv μπορεί να παράγει έγκυρες υπογραφές σε όποιο μήνυμα θέλει ($\Leftrightarrow$ κατοχή ιδιωτικού κλειδιού)
+\pause
+\item \alert{Επιλεκτική πλαστογράφηση}: Ο \adv μπορεί να παράγει 1 έγκυρη υπογραφή σε μήνυμα (με νόημα) της επιλογής του   
+\pause
+\item \alert{Υπαρξιακή πλαστογράφηση}: Ο \adv μπορεί να παράγει 1 έγκυρη υπογραφή (τυχαία bits) σε τυχαίο μήνυμα
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Αντίπαλοι}
+\begin{block}{Είδη Αντιπάλων}
+\begin{itemize}
+\item Παθητικός (passive): Απλά γνωρίζει το κλειδί επαλήθευσης και ζεύγη μηνυμάτων, έγκυρων υπογραφών
+\item Ενεργός (active): Μπορεί να αποκτήσει έγκυρες υπογραφές σε μηνύματα της επιλογής του
+\item Ενεργός με προσαρμοστικότητα (adaptive active): Μπορεί να αποκτήσει έγκυρες υπογραφές σε μηνύματα της επιλογής του που εξαρτώνται από προηγουμενες έγκυρες υπογραφές
+\end{itemize}
+\end{block}
+\framebreak
+Ασφάλεια ως προς τον δυνατότερο αντίπαλο - ευκολότερη επίθεση
+
+\begin{block}{Διαισθητικά}
+Ένα σχήμα υπογραφής είναι ασφαλές αν δεν επιτρέπει σε έναν ενεργό αντίπαλο με προσαρμοστικότητα να επιτύχει υπαρξιακή πλαστογράφηση 
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Ορισμός Ασφάλειας}
+\begin{block}{Το παιχνίδι πλαστογράφησης $Forge-Game$}
+\begin{itemize}
+\item Ο $S$ εκτελεί τον αλγόριθμο $\keygen(1^\lambda)$ και παράγει τα $(pk,sk)$
+\pause
+\item Ο \adv έχει πρόσβαση σε ένα μαντειο υπογραφών $\sign(sk,\cdot)$ με το οποίο αποκτά ένα σύνολο έγκυρων υπογραφών $Q = \{(m_i, \sigma_i)\}$ \\
+\pause
+\green{γιατί στην `πραγματική ζωή` μπορεί να χρησιμοποιήσει παλιότερες υπογραφές}
+\pause
+\item O \adv επιλέγει ένα μήνυμα $m$ και παράγει το ζεύγος $(m, \sigma)$ 
+\pause
+\item $Forge-Game(\mathcal{A}) = 1 \Leftrightarrow \verify(key_{ver}, m, \sigma)=1 \wedge (m, \sigma) \not \in Q$
+\end{itemize}
+\end{block}
+\pause
+O \adv κερδίζει το παιχνίδι αν $Pr[Forge-Game(\mathcal{A})=1] = non-negl(\lambda)$
+\end{frame}
+
+\section{Ψηφιακές Υπογραφές RSA}
+\begin{frame} {Ψηφιακές Υπογραφές RSA}
+ 
+\textbf{Δημιουργία Κλειδιών:}
+$KeyGen(1^{\lambda}) = (d,(e,n))$
+\begin{itemize}
+\item $n=p \cdot q$, $p,q$ πρώτοι αριθμοί $\frac{\lambda}{2}$ bits
+\item Επιλογή $e$ ώστε $gcd(e,\phi(n))=1$
+\item $d = e^{-1} \pmod{\phi(n)}$ με EGCD
+\end{itemize}
+\pause
+\textbf{Υπογραφή} - Αποκρυπτογράφηση
+\begin{itemize}
+\item $\sign(d, m) = m^d \bmod n$
+\end{itemize}
+\pause
+\textbf{Επαλήθευση} - Κρυπτογράφηση
+\begin{itemize}
+\item $\verify((e,n), m, \sigma) = \ \ \ \sigma^e =_? m \pmod{n}$
+\end{itemize} 
+\pause
+\begin{block}{Ορθότητα}
+$\verify((e,n), m, m^d \bmod{n})= \ \ \  {m^d}^e = m \pmod{n}$
+\end{block}
+\pause
+\alert{...αλλά καθόλου ασφάλεια}
+\end{frame}
+
+\begin{frame}{Επίθεση Χωρίς Μήνυμα (No message attack)}
+\begin{itemize}
+\item O \adv έχει στη διάθεση του δημόσιο κλειδί $(e,n)$
+\pause
+\item $Q = \emptyset$ - δεν υποβάλλονται μηνύματα για υπογραφή
+\pause
+\item Επιλογή τυχαίου $\sigma \in \zns$
+\pause
+\item 'Kρυπτογράφηση' $\sigma$: $\sigma^e \bmod n = m$
+\pause
+\item Το ζεύγος $(m,\sigma)$ είναι έγκυρο και $\not \in Q$
+\pause
+\item O \adv κερδίζει με πιθανότητα 1
+\end{itemize}
+
+\alert{Έχει νόημα;} - \green{Ναι}, το $m$ μπορεί να είναι αποτέλεσμα κωδικοποίησης
+\end{frame}
+
+\begin{frame}{Επίθεση Επιλεγμένων Μηνυμάτων (Chosen message attack)}
+\begin{itemize}
+\item O \adv έχει στη διάθεση του δημόσιο κλειδί $(e,n)$ και θέλει να πλαστογραφήσει υπογραφή για $m \in \zns$
+\pause
+\item O \adv χρησιμοποιώντας το μαντείο αποκτά τις υπογραφές 2 μηνυμάτων $Q = \{ (m_1, \sigma_1), (\frac{m}{m_1}, \sigma_2) \}$ με $m_1 \in_R \zns $
+\pause
+\item Υπολογισμός $\sigma = \sigma_1  \sigma_2 = m_1^d (\frac{m}{m_1})^d = m ^ d \bmod{n}$
+\pause
+\item H $\sigma$ είναι έγκυρη υπογραφή για το $m$ και $\not \in Q$
+\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{RSA - FDH (Full Domain Hash)}
+ 
+
+\textbf{Δημιουργία Κλειδιών:}
+$KeyGen(1^{\lambda}) = (d,(e,n))$
+\begin{itemize}
+\item $N=p \cdot q$, $p,q$ πρώτοι αριθμοί $\frac{\lambda}{2}$ bits
+\item Επιλογή $e$ ώστε $gcd(e,\phi(n))=1$
+\item $d = e^{-1} \pmod{\phi(n)}$ με EGCD
+\item \green{Χρήση δημόσια διαθέσιμης τυχαίας συνάρτησης $ \Hash : \{ 0,1 \}^* \rightarrow \zns$}
+\end{itemize}
+  
+\textbf{Υπογραφή} 
+\begin{itemize}
+\item \green{Υπολογισμός $\Hash(m)$}
+\item $\sign(d, m) = \Hash(m)^d \bmod n$
+\end{itemize}
+\textbf{Επαλήθευση}
+\begin{itemize}
+\item \green{Υπολογισμός $\Hash(m)$}
+\item $\verify((e,N), m, \sigma) = \ \ \ \sigma^e =_? \Hash(m) \pmod{N}$
+\end{itemize} 
+
+\begin{block}{Ορθότητα}
+$\verify((e,N), m, \Hash(m)^d)= \ \ \  {\Hash(m)^d}^e = \Hash(m) \pmod{N}$
+\end{block}
+Υλοποίηση: συνάρτηση σύνοψης με δυσκολία εύρεσης συγκρούσεων
+ 
+Πλεονέκτημα: Μπορεί να χρησιμοποιηθεί για υπογραφή τυχαίων συμβολοσειρών και όχι μόνο στοιχείων του $\zns$\
+
+\framebreak
+
+\begin{itemize}
+\item Επίθεση χωρίς μήνυμα
+\begin{itemize}
+\item Επιλογή τυχαίου $\sigma \in \zns$
+\item Η `κρυπτογράφηση` δίνει τη σύνοψη $h=\sigma^e \bmod{n}$ όχι το μήνυμα
+\item Για το μήνυμα πρέπει $m: \Hash(m) = h$
+\item Δυσκολία αντιστροφής
+\end{itemize}
+\framebreak
+
+\item Επίθεση επιλεγμένων μηνυμάτων
+\begin{itemize}
+\item O \adv έχει στη διάθεση του δημόσιο κλειδί $(e,n)$ και θέλει να πλαστογραφήσει υπογραφή για $m \in \zns$
+\item O \adv χρησιμοποιώντας το μαντείο αποκτά τις υπογραφές 2 μηνυμάτων $Q = \{ (m_1, \sigma_1), (\frac{m}{m_1}, \sigma_2) \}$ με $m_1 \in_R \zns $
+\item Υπολογισμός $\sigma = \sigma_1  \sigma_2 = \Hash(m_1) \Hash(\frac{m}{m_1}) $
+\item Δυσκολία αντιστροφής
+\end{itemize}
+\end{itemize} 
+
+
+\begin{itemize}
+\item Απόδειξη Ασφάλειας: Πρέπει η $\Hash$ να δίνει 'τυχαίες΄ τιμές
+\item Αρκούν οι ιδιότητες τους (one-way-ness, collision resistance); 
+\begin{itemize}
+\item \alert{ΟΧΙ}
+\end{itemize}
+\item Το μοντέλο του τυχαίου μαντείου (M. Bellare, P. Rogaway, -1993)
+\end{itemize}
+\end{frame}
+
+ 
+\section{Το μοντέλο του τυχαίου μαντείου}
+
+\begin{frame}{Συναρτήσεις σύνοψης ως τυχαίες συναρτήσεις - informal}
+\begin{itemize}
+\item Θεωρητικά θα θέλαμε να συμπεριφέρονται ως τυχαίες συναρτήσεις
+\pause
+\item Πρακτικά όμως:\alert{αδύνατον να κατασκευαστούν}
+\pause
+\begin{itemize}
+\item Συνάρτηση $\Hash: \{0,1\}^n \rightarrow \{ 0,1 \}^{l(n)}$
+\pause
+\item Κατασκευή ως πίνακας τιμών: Απαιτούνται $2^n$ γραμμές
+\begin{tabular}{|c|c|}
+Έισοδος & Έξοδος \\
+$0\cdots00$ & $r_1$ \\
+$0\cdots01$ & $r_2$\\
+$\cdots$ & $\cdots$\\
+$1\cdots11$ & $r_{l(n)}$\\
+\end{tabular}
+\pause
+\item Συμπίεση: Μείωση τυχαιότητας
+\end{itemize}
+\end{itemize}
+\pause
+Ακόμα και να μπορούσαν να κατασκευαστούν \\
+αδύνατη αποθήκευση\\
+εκθετική αποτίμηση (μη αποδεκτή και για χρήστη και για αντίπαλο)
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Συναρτήσεις σύνοψης και αποδείξεις ασφάλειας}
+
+\begin{block}{Τυχαίο Μαντείο - Αφαιρετική αναπαράσταση συνάρτησης σύνοψης}
+\begin{itemize}
+\item Μαύρο κουτί - απαντάει σε ερωτήσεις
+\item (Τέλεια) Ασφάλεια στο κανάλι επικοινωνίας (μοντελοποίηση τοπικής αποτίμησης)
+\item Είναι συνάρτηση (ίδια είσοδος - ίδια έξοδος σε κάθε κλήση)
+\item Είναι συνάρτηση σύνοψης (υπάρχουν συγκρούσεις - αλλά είναι δύσκολο να βρεθούν)
+\end{itemize}
+\end{block}
+
+\framebreak
+
+\begin{block}{Lazy Evaluation}
+\begin{itemize}
+\item Εσωτερικός πίνακας - αρχικά άδειος
+\item Για κάθε ερώτηση: έλεγχος αν έχει ήδη απαντηθεί
+\item Αν ναι, τότε ανάκτηση της απάντησης
+\item Αν όχι, απάντηση με τυχαία τιμή και αποθήκευση για μελλοντική αναφορά
+\end{itemize}
+\end{block}
+\framebreak
+
+Αποδείξεις στο μοντέλο τυχαίου μαντείου (Bellare - Rogaway)
+\begin{itemize}
+\item Ο \adv \emph{νομίζει} ότι αλληλεπιδρά με το τυχαίο μαντείο
+\item Στην πραγματικότητα το προσομοιώνει η αναγωγή (programmability)
+\item Μπορούμε να μάθουμε τις ερωτήσεις του \adv
+\item Στο πραγματικό πρωτόκολλο το τυχαίο μαντείο αντικαθίσταται από μία πραγματική συνάρτηση (πχ. SHA256)
+\end{itemize}
+
+\framebreak
+
+\end{frame}
+
+\begin{frame}{Απόδειξη Ασφάλειας Hashed RSA}
+\begin{theorem}
+Αν το πρόβλημα RSA είναι δύσκολο, τότε οι υπογραφές Hashed RSA παρέχουν ασφάλεια έναντι πλαστογράφησης στο μοντέλο του τυχαίου μαντείου.
+\end{theorem}
+\pause
+Γενική κατασκευή:
+\begin{itemize}
+\item Ο \adv μπορεί να κατασκευάσει πλαστογράφηση υπογραφής
+\pause
+\item Κατασκευή \advb που με χρήση του \adv και ενός τυχαίου μαντείου μπορεί να αντιστρέψει το RSA
+\pause
+\item \green{Είσοδος \advb}
+\begin{itemize}
+\item Δημόσιο κλειδί $(e,N)$
+\pause
+\item Στοιχείο $y \in \zns$
+\pause
+\end{itemize}
+\item \magenta{Έξοδος \advb}
+\begin{itemize}
+\item $x=y^\frac{1}{e}$
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[allowframebreaks]{Απόδειξη Ασφάλειας Hashed RSA \\ Επίθεση χωρίς μήνυμα} 
+
+\begin{block}{Υπόθεση}
+Για την πλαστογράφηση $(m,\sigma)$ έχει προηγουμένως ερωτηθεί στο μαντείο το $\Hash(m)$
+\end{block}
+
+\begin{block}{Συνέπεια}
+Εφόσον η πλαστογράφηση είναι έγκυρη υπογραφή πρέπει $\sigma^e = \Hash(m)$
+Άρα $\sigma = \Hash(m)^{\frac{1}{e}}$
+\end{block}
+
+\framebreak
+
+\begin{itemize}
+\item Ο \advb προωθεί το $(e,N)$ στον \adv
+\item O \adv κάνει $q=poly(\lambda)$ ερωτήσεις στο μαντείο για μηνύματα $\{m_i\}_{i=1}^q$ και λαμβάνει τις απαντήσεις $\{\Hash(m_i)\}_{i=1}^q \in_r \zns$
+\item Ο \advb επιλέγει \emph{τυχαία} μία ερώτηση και αντικαθιστά την απάντηση $Η(m_i^*)$ με το $y$
+\item Ο \advb \emph{ελπίζει} ότι στο $Η(m_i^*)$ θα γίνει η πλαστογράφηση
+\item Αν έχει δίκιο, τότε ο \adv εξάγει την πλαστογραφία $(m,\sigma)$ με πιθανότητα $\mathtt{p}$
+\item Δηλαδή: $\sigma^e = y \Rightarrow \sigma = y^\frac{1}{e}$
+\item Ο \advb προωθεί το $\sigma$ στην έξοδο
+\item Με πιθανότητα επιτυχίας $\frac{\mathtt{p}}{q}$ θα ισχύει $\sigma = y^\frac{1}{e}$
+\end{itemize}
+
+\begin{center}
+Αν $\mathrm{\mathtt{p}}$ αμελητέο τότε $\frac{\mathtt{p}}{q}$ αμελητέο
+\end{center}
+
+\framebreak
+\begin{center}
+\includegraphics[scale=0.7]{ro-nom.png}
+\end{center}
+\end{frame}
+
+
+\begin{frame}[allowframebreaks]{Απόδειξη Ασφάλειας Hashed RSA \\ Επίθεση επιλεγμένου μηνύματος} 
+
+\begin{block}{Σενάριο}
+\begin{itemize}
+\item \adv πρέπει να υπολογίσει έγκυρες υπογραφές
+\item Ζητάει συνόψεις και υπογραφές από τον \advb
+\item Συνόψεις: το τυχαίο μαντείο
+\item Υπογραφές: Πρέπει να τις απαντήσει ο \advb
+\item ...χωρίς το ιδιωτικό κλειδί
+\end{itemize}
+\end{block}
+
+\green{Λύση}
+
+Αντικατάσταση $\Hash (m)$ με $\sigma^e$ για γνωστό $\sigma$
+
+Τετριμμένη επαλήθευση $\sigma^e = \sigma^e (=\Hash(m))$
+
+
+
+\framebreak
+\begin{itemize}
+\item Ο \advb προωθεί το $(e,N)$ στον \adv
+\item O \adv κάνει $q$ ερωτήσεις στο μαντείο για μηνύματα $\{m_i\}_{i=1}^q$
+\item Κάθε ερώτηση απαντάται από τον \advb ως εξής:
+\begin{itemize}
+\item Επιλέγει τυχαίο $\sigma_i \in \zns$
+\item Υπολογίζει $y_i = \Hash(m_i) = \sigma_i^e \bmod N$
+\item Επιστρέφει $y_i$
+\item Aποθηκεύει τις  τριάδες $\mathcal{T} = (m_i, y_i, \sigma_i)$
+\end{itemize}
+
+\item O \adv ζητάει υπογραφές
+\begin{itemize}
+\item Για κάθε σύνοψη $y_i$ γίνεται αναζήτηση στον $\mathcal{T}$ για την τριάδα και επιστρέφεται το $\sigma_i$
+\item Οι υπογραφές είναι έγκυρες αφού $\sigma_i^e = y_i$
+\end{itemize}
+\item Ο \advb μαντεύει ποιο ερώτημα στο RO θα οδηγήσει στην πλαστογράφηση.  Το απαντάει με $y$
+\item Για το συγκεκριμένο δεν θα ζητηθεί υπογραφή, αλλά το $\sigma$ θα παραχθεί από τον \adv (πλαστογράφηση)
+\item Για να είναι έγκυρη η πλαστογράφημενη υπογραφή πρέπει $\sigma^e = y$,δηλαδή $\sigma=y^\frac{1}{e}$
+\item Πιθανότητα επιτυχίας \adv $p$ και πιθανότητα επιτυχίας \advb $\frac{p}{q}$
+\end{itemize}
+
+\begin{center}
+Αν $\mathrm{\mathtt{p}}$ αμελητέο τότε $\frac{\mathtt{p}}{q}$ αμελητέο
+\end{center}
+
+\framebreak
+
+\begin{center}
+\includegraphics[scale=0.7]{ro-chosenm.png}
+\end{center}
+
+\end{frame}
+
+\begin{frame}{Το μοντέλο του τυχαίου μαντείου - κριτική}
+\begin{small}
+\begin{block}{\alert{Μειονεκτήματα}}'Άχρηστη' απόδειξη - Καμία πραγματική συνάρτηση $\Hash$ δεν είναι random oracle \\
+\pause
+Εσωτερική χρήση - Δεν φαίνονται οι τιμές στις οποίες αποτιμάται \\
+\pause
+Programmability - Η περιγραφή της συνάρτησης είναι σταθερή στην πραγματικότητα \\
+\pause
+Ύπαρξη 'θεωρητικών' σχημάτων τα οποία αποδεικνύονται ασφαλή, αλλά οποιαδήποτε κατασκευή τους είναι μη ασφαλής \\
+\end{block}
+\pause
+\begin{block}{\green{Πλεονεκτήματα}}
+Απόδειξη με χρήση τυχαίου μαντείου είναι καλύτερη από απουσία απόδειξης \\
+\pause
+Η μόνη αδυναμία: η συνάρτηση σύνοψης \\
+\pause
+Δεν υπάρχουν πραγματικές επιθέσεις που να έχουν εκμεταλλευτεί την απόδειξη μέσω τυχαίου μαντείου
+\end{block}
+\end{small}
+\end{frame}
+
+\section{Ψηφιακές Υπογραφές ElGamal}
+
+\begin{frame}[allowframebreaks]{Σχήμα Υπογραφής ElGamal}
+ 
+\textbf{Δημιουργία Κλειδιών:}
+\begin{itemize}  
+\item Επιλογή πρώτου $p$. Δουλεύουμε στο $\zs{p}$ \alert{ΠΡΟΣΟΧΗ!}
+\item Επιλογή γεννήτορα $g$
+\item Επιλογή $x \in  \{2 \cdots p-2\}$ και υπολογισμός του $y = g^x \pmod{p}$
+\item Δημόσιο κλειδί $(p,g,y)$, ιδιωτικό κλειδί $x$.
+\end{itemize}
+ 
+\textbf{Υπογραφή Μηνύματος $m$}
+\begin{itemize}
+\item Επιλογή τυχαίου $k \in \zs{p-1} \ δηλ. \ gcd(k,p-1)=1$
+\item Υπολογισμός
+\begin{align*}
+r  =   g^k \bmod p \\
+s  =   (m - x r) k^{-1} \bmod{(p-1)} 
+\end{align*}
+
+\item Υπογραφή είναι:$(r,s)$
+\item Δύο ακέραιοι μεγέθους $O(|p|)$
+\end{itemize}
+\framebreak
+
+\textbf{Επαλήθευση υπογραφής στο $m$}
+
+$\verify(y,m,(r,s)) =\twopartdef{1}{ y^r \cdot r^s \equiv g^m  \pmod{p}}{0}{  y^r \cdot r^s \neq g^m   \pmod{p}}$ και $k<p$
+
+\medskip
+
+\begin{block}{Ορθότητα}
+ 
+\begin{align*}
+y^r r^s \equiv g^{xr} g^{ks} = g^{xr+ks} \equiv g^m\pmod{p}
+\end{align*}
+
+το οποίο ισχύει λόγω της κατασκευής του $s$
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Παρατηρήσεις}
+\begin{itemize}
+\item Πιθανοτικό σχήμα υπογραφής - πολλές έγκυρες υπογραφές για ένα μήνυμα $m$ (τυχαίο $k$)
+\pause
+\item Η συνάρτηση επαλήθευσης δέχεται οποιαδήποτε από αυτές ως έγκυρη
+\pause
+\item Χειρισμός Τυχαιότητας
+\begin{itemize}
+\item Το τυχαία επιλεγμένο $k$ πρέπει να κρατείται κρυφό
+\item H επανάληψη της χρήσης του ίδιου $k$ καθιστά για τον \adv εφικτό τον υπολογισμό του  
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Επίθεση επανάληψης κλειδιού}
+Χρήση ίδιου εφήμερου κλειδιού στην υπογραφή δύο μηνυμάτων $m_1,m_2$
+\begin{itemize}
+    \item $sign(x,m_1) = (r,s_1)$ με $s_1 = (m_1 - x r) k^{-1} $
+    \item $sign(x,m_2) = (r,s_2)$ με $s_2 = (m_2 - x r) k^{-1} $
+    \item Αφαιρούμε κατά μέλη:
+    \item $s_1 - s_2 = (m_1 - m_2) k^{-1}$
+    \item Υπάρχουν $d=gcd(s_1 - s_2,p-1)$ λύσεις της μορφής
+    \item $k = \frac{m_1-m_2}{d} \frac{s_1-s_2}{d}^{-1} + i \frac{p-1}{d} \bmod{p-1}, \quad i \in \{0, \cdots,d-1 \}$
+    \item Δοκιμή όλων των $k$ ως προς το γνωστό $r$
+    \item Yπολογισμός ιδιωτικού κλειδιού
+\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Ασφάλεια έναντι πλαστογράφησης}
+
+\alert{Στόχος: $g^{xr} \cdot r^s \equiv g^{m} \pmod p$}
+
+\begin{enumerate}
+\item Επιλέγω $m$ και προσπαθώ να βρώ $r,s$ για έγκυρη υπογραφή
+\begin{itemize}
+\item Επιλέγω $r$, ψάχνω $s$. Πρέπει
+$r^s \equiv g^{m} \cdot g^{-xr} \pmod p$ (επίλυση DLP).
+
+\item Επιλέγω $s$, ψάχνω $r$. Πρέπει:
+$g^{xr}  \equiv g^{m} \cdot r^{-s} \pmod p$
+
+Ανοιχτό πρόβλημα - δε γνωρίζουμε σχέση με DLP 
+\end{itemize}
+ 
+
+\item Επιλέγω $r$ και $s$, ψάχνω $m$: DLP ξανά.
+
+\framebreak
+
+\item Κατασκευή $r$, $s$, $m$ ταυτόχρονα.\\
+Επιλέγω $i,j$
+με $ \ \ 0\leq i,j \leq p-2, $\\
+και $ \ \  \gcd(j,p-1)=1$  και θέτω: \\
+\begin{align*}
+ r=g^{i} \cdot (g^{x})^j \bmod p \\
+ s = -r\cdot j^{-1} \bmod {p-1} \\
+ m = -r\cdot i\cdot j^{-1} \bmod {p-1}
+\end{align*}
+
+\green {Τα (r,s) επαληθεύουν την υπογραφή}
+
+\alert{Εφικτό σενάριο, δίνει υπογραφή για τυχαίο $m$}
+
+\green{Aντιμετώπιση με redundancy function / hash function}
+
+\end{enumerate}
+ 
+\end{frame}
+
+\begin{frame}
+\frametitle{Πρότυπο Ψηφιακής Υπογραφής (Digital Signature Standard -- DSS)} 
+
+\begin{block}{Βασικά Στοιχεία}
+\begin{itemize}
+\item NIST, 1991.
+\pause
+\item Παραλλαγή του ElGamal, μικρότερο μέγεθος υπογραφής.
+\pause
+\item Ιδέα: λειτουργία σε μια \magenta{υποομάδα της $\Zed_p^*$, τάξης $2^{160}$}.
+\pause
+\item Τα $r, s$ είναι εκθέτες δυνάμεων του γεννήτορα της υποομάδας.
+\end{itemize}
+\end{block}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Παραγωγή κλειδιών DSS}
+
+\begin{block}{}
+\begin{enumerate}
+\item Επιλογή πρώτων $q$ μεγέθους 160-bit και $p$ μεγέθους $n$-bit, $n=64{\lambda}$, $\lambda=8,9,10,\ldots,16$, με $q \mid (p-1)$.\pause
+\item Εύρεση $g$ γεννήτορα της υποομάδας τάξης $q$ του $\mathbb{Z}_p^*$ \pause
+\item Επιλογή ιδιωτικού κλειδιού $x \in \Zed_q$.\pause
+\item Υπολογισμός $g^x \bmod{p}$. 
+\end{enumerate}
+\pause
+\begin{flushleft}
+Δημόσιο κλειδί: $(p,q,g,y), y = g^x \bmod p$.\\
+Ιδιωτικό κλειδί: $x$.
+\end{flushleft}
+\end{block}
+
+\end{frame}
+
+
+\begin{frame} \frametitle{DSS:Δημιουργία υπογραφής}
+
+\begin{block}{}
+\begin{enumerate}
+\item Ο υπογράφων επιλέγει έναν τυχαίο ακέραιο $k,\ 1 \leq k \leq (q-1)$.\pause
+\item Υπολογίζει τα \pause
+\begin{align*}
+r  =   (g^k \bmod{p}) \bmod{q}  \\
+s  =   (\Hash(m)+ x \cdot r)k^{-1}\bmod{q}
+\end{align*} 
+\item Αν συμβεί $r,s \equiv 0\pmod{q}$ η διαδικασία επαναλαμβάνεται \pause
+\item Υπογραφή: $(r,s)$.
+\end{enumerate}
+\end{block}
+\end{frame}
+
+
+\begin{frame}\frametitle{DSS:Επαλήθευση υπογραφής DSA}
+Ο $B$ υπολογίζει:
+
+\begin{align*}
+h=\Hash(m) \\
+e_1  =   s^{-1} h \bmod{q} \\
+e_2  =   rs^{-1}  \bmod{q} 
+\end{align*}		 
+\pause
+\green{$\verify(y,m,(r,s)) = \mathsf{1} \Leftrightarrow (g^{e_1}(y)^{e_2} \bmod{p}) \bmod{q}=r$ }
+\pause
+\begin{block}{Ορθότητα}
+\begin{align*}
+g^{e_1}(y)^{e_2}  = 
+g^{hs^{-1}} \cdot g^{xrs^{-1}}  \\
+g^{hs^{-1}+xrs^{-1}}  = 
+g^{(h+xr)s^{-1}} = \\
+g^{kss^{-1}} = 
+g^{k} (\bmod{p} \bmod{q})
+\end{align*}
+\end{block}
+\pause
+\alert{Υπογραφή γρηγορότερη από επαλήθευση}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Ψηφιακές Υπογραφές - ECDSA}
+
+\textbf{Δημιουργία κλειδιών }
+\begin{itemize}
+\item Δημόσια Διαθέσιμες Παράμετροι: $(p,a,b,\# \mathcal{E},q,G)$
+\item Ιδιωτικό κλειδί: Ένας τυχαίος ακέραιος $x \in \{1, \cdots, q-1 \}$
+\item Δημόσιο κλειδί: Το σημείο $Y=xG \in \mathcal{E}$
+\end{itemize}
+
+\framebreak
+
+\textbf{Υπογραφή}
+\begin{itemize}
+\item Υπολογισμός σύνοψης του μηνύματος $h = \mathcal{H}(M)$ και προσαρμογή της στο $[ 0, \cdots, q-1 ]$
+\item Επιλογή τυχαίου αριθμού $k$ στο σύνολο $\{ 1, \cdots, q-1 \}$
+\item Υπoλογισμός του σημείου $P=kG=(x_P,y_P)$.
+\item Υπολογισμός του $r = x_P \bmod q$
+\item \alert{Αν $r = 0 \pmod{q}$ τότε επιλέγεται καινούριο $k$ και η διαδικασία επαναλαμβάνεται}.
+\item Υπολογισμός του $s = k^{-1} (h + r \cdot x) \bmod{q}$
+\item \alert{Αν $s=0$ τότε επιλέγεται καινούριο $k$ και η διαδικασία επαναλαμβάνεται}.
+\item Η υπογραφή είναι το ζεύγος $(r,s)$
+\end{itemize}
+
+\framebreak
+
+\textbf{Επαλήθευση}
+\begin{itemize}
+\item Υπολογισμός του $u_1 = s^{-1} h \bmod{q}$
+\item Υπολογισμός του $u_2 = s^{-1} r \bmod{q}$
+\item Υπολογισμός του σημείου $P' = u_1 G + u_2 Y$
+\item H υπογραφή είναι έγκυρη αν $r = x_{P' } \pmod{q}$ 
+\end{itemize}
+
+\medskip
+\medskip
+
+\textbf{Ορθότητα}: Υπολογισμός ίδιου σημείου με 2 τρόπους
+
+\begin{itemize}
+\item Υπογραφή $P=kG$
+\item Επαλήθευση $P' = u_1 G + u_2 Y $
+\end{itemize}
+\begin{align*}
+P' = u_1 G + u_2 Y = s^{-1} (h+rx) G = k(h+rx)^{-1}(h+rx)G = kG = P
+\end{align*}
+
+\end{frame}
+
+\section{Υποδομή Δημοσίου Κλειδιού}
+
+\begin{frame}{Πρακτική χρήση ψηφιακών υπογραφών}
+     \begin{itemize}
+        \item Διαφορά Συμμετρικών - Ασύμμετρων Κρυπτοσυστημάτων
+        \begin{itemize}
+            \item Συμμετρικά: Δύσκολη διανομή, Εύκολη Αυθεντικότητα (λόγω φυσικών υποθέσεων)
+            \item Ασύμμετρα: Εύκολη διανομή, Δύσκολη Αυθεντικότητα
+        \end{itemize}
+        \item Αντιστοιχία  (?) Ταυτότητας Χρήστη - Δημοσίου, Ιδιωτικού Κλειδιού (binding)
+        \pause
+        \item Ενεργός αντίπαλος - Πλαστοπροσωπία - αλλαγή κλειδιών
+        \pause
+        \item Απαραίτητη η διασφάλιση για χρήση σε ευρεία κλίμακα
+        \pause
+        \item \alert{Δεν υπάρχει λύση} που να δουλεύει θεωρητικά \textbf{και} πρακτικά
+        \pause 
+        \item Στην πράξη: μετάθεση του προβλήματος με μείωση της έκτασης (αρκεί 1 αυθεντικό κλειδί)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Αρχές Πιστοποίησης (Certification Authorities - CAs)}
+    \begin{itemize}
+    \item \emph{Έμπιστες} Τρίτες Οντότητες - (Πάροχοι Υπηρεσιών Πιστοποίησης)
+    \pause
+    \begin{itemize}
+        \item Πιστοποίηση Αντιστοιχίας Ταυτότητας Κλειδιών
+        \pause
+        \item Εγγυάται ότι το δημόσιο κλειδί \emph{όντως} αντιστοιχεί στον χρήστη
+        \pause
+        \item Πώς;
+        \pause 
+        \item Υπογράφοντας `ψηφιακά` τo ζεύγος $(ID, PK_{ID})$        
+    \end{itemize}
+    \pause
+    \item \green{Πλεονέκτημα}: Μείωση κλειδιών που πρέπει να αποκτήσουμε με έμπτιστο τρόπο
+    \begin{itemize}
+        \item Μόνο το κλειδί της CA
+        \item Για τα υπόλοιπα `εγγύαται` το πιστοποιητικό
+    \end{itemize}
+    \item \alert{Μειονέκτημα} Ποιος εγγυάται την σχέση κλειδιών-ταυτότητας για την CA;
+    \begin{itemize}
+    \pause
+    \item Η ίδια! (υπογράφει η ίδια μία δήλωση για τον εαυτό της)
+    \pause
+    \item ή μια άλλη \emph{ανώτερη} αρχή πιστοποίησης!
+    \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Ιεραρχική Οργάνωση Αρχών Πιστοποίησης}
+\begin{itemize} 
+    \item Ενδιάμεσες Αρχές: Υπογραφή από ανώτερη αρχή 
+    \item Ριζικές (Root) Αρχές: Υπογράφουν μόνες τους
+    \item Συνήθως 3-4 επίπεδα
+\end{itemize}
+\begin{center}
+\includegraphics[scale=0.5]{pki.PNG}
+\end{center}
+\end{frame}
+
+\begin{frame}{Υποδομή Δημοσίου Κλειδιού}
+\begin{itemize}
+    \item Οργάνωση των αρχών πιστοποίησης και των σχετικών υπηρεσιών \pause
+    \item Loren Kohnfelder, MIT BSc thesis, 1978 \pause
+    \item Ευρεία προτυποποίηση (ITU X.500, RFC 6818)
+    \begin{itemize}
+        \item Πρόσβαση σε υπηρεσίες καταλόγου
+        \item X.509: Συσχέτιση οντότητας με δημόσιο κλειδί
+        \item Ψηφιακό Πιστοποιητικό: 
+        \begin{itemize}
+            \item Δήλωση σχέσης κλειδιού - ονόματος
+            \item Επιπλέον πληροφορίες για την επαλήθευση
+        \end{itemize}
+    \end{itemize}    
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Πιστοποιητικό X.509 - Δομή}
+    \begin{center}
+    \includegraphics[scale=0.5]{x509.PNG}
+    \end{center} 
+\end{frame}
+
+\begin{frame}{Πιστοποιητικό X.509 - Παράδειγμα} 
+    \begin{tabular}{ c c }
+    \includegraphics[scale=0.41]{cer1.PNG} & \includegraphics[scale=0.41]{cer2.PNG}
+    \end{tabular}  
+\end{frame}
+
+\begin{frame}{Απόκτηση πιστοποιητικών}
+\begin{itemize}
+\item Προεγκατάσταση στο λειτουργικό σύστημα
+\pause
+\item Προεγκατάσταση στον περιηγητή
+\pause
+\item Απόκτηση από αρχείο/ιστοσελίδα
+\pause
+\item Απόκτηση από νομική οντότητα (εταιρεία, κράτος)
+\pause
+\end{itemize}
+  \begin{center}
+    \includegraphics[scale=0.3]{certificates.PNG}
+    \end{center} 
+\end{frame}
+
+\begin{frame}{Αρχές Πιστοποίησης - Άλλες υπηρεσίες}
+    \begin{itemize}
+        \item  Διάδοση Πιστοποιητικών σε αποθετήρια
+        \pause
+        \item  Εγγραφή-Επαλήθευση Ταυτότητας Χρηστών 
+        \pause
+        \item  Δημιουργία κρυπτογραφικών κλειδιών (αυστηρές προδιαγραφές ασφάλειας)
+        \pause
+        \item  Ανάκληση Πιστοποιητικών - Ενημέρωση
+        \pause
+        \item  Χρονοσήμανση - Αρχειοθέτηση
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Ανάκληση Πιστοποιητικών}
+Άκυρα πιστοποιητικά
+\begin{itemize}
+\item Απώλεια κλειδιού υπογραφής, Αλλαγή Στοιχείων Υποκειμένου, 
+\pause
+\item Ενημέρωση Χρηστών με 2 τρόπους
+\pause
+\item Certificate Revocation Lists (CRL): 
+\begin{itemize}
+    \item `Μαύρη` λίστα από SN για πιστοποιητικά που δεν ισχύουν
+    \item Υπογεγραμμένη από την CA
+    \item Ανάκτηση σε τακτά χρονικά διαστήματα
+    \item Πεδίο CDP 
+\end{itemize}
+\pause
+\item OCSP (Online Certificate Status Protocol)
+\begin{itemize}
+    \item Ερώτηση στην CA για ισχύ πιστοποιητικού
+    \item H CA συμμετέχει σε κάθε συναλλαγή
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Εναλλακτικές Προσεγγίσεις}
+\begin{itemize}
+\item Ομότιμη έκδοση και επαλήθευση ταυτότητας (web of trust)
+\begin{itemize}
+    \item Κάθε χρήστης είναι CA
+    \item Υπογράφει αντιστοιχίες που γνωρίζει
+    \item Λήψη πιστοποιητικών μόνο από γνωστούς χρήστες
+    \item O κάθε χρήστης `εγγυάται` για τους γνωστούς του
+    \item PGP
+\end{itemize}
+\framebreak
+\item Identity based cryptography 
+\begin{itemize}
+    \item Signatures:Shamir 1984
+    \item Encryption:Boneh-Franklin (2001)
+    \item Οποιοδήποτε όνομα κάποιου χρήστη πχ. email είναι η ταυτότητα
+    \item Δεν χρειάζεται διανομή κλειδιού
+    \item Χρειάζεται κεντρική TTP 
+    \item Παράγει τα ιδιωτικά κλειδιά από την ταυτότητα
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Identity based signatures}
+\begin{itemize}
+    \item TTP έχει κλειδί RSA $((e,n),d)$
+    \pause
+    \item Δημιουργία ιδιωτικού κλειδιού από ταυτότητα χρήστη $id$
+    \pause
+    \begin{itemize}
+        \item Υπογραφή σύνοψης της ταυτότητας 
+        \item $k = \mathcal{H}(id)^d \bmod{n}$ 
+        \item Ασφαλής Διανομή στον κάτοχο
+    \end{itemize}
+    \item Υπογραφή από χρήστη $id$
+    \pause
+    \begin{itemize}
+        \item Επιλογή τυχαίου $r$
+        \item $t =r^e \bmod{n}$ 
+        \item $s =k \ r^{\mathcal{H}(m | t)} \bmod{n}$ 
+    \end{itemize}
+    \pause
+    \item Επαλήθευση υπογραφής με την ταυτότητα:
+    \pause
+    \item Έλεγχος αν: $\mathcal{H}(id) t^{\mathcal{H}(m|t)} = s^e$
+    \pause
+    \item Ορθότητα: $\mathcal{H}(id) t^{\mathcal{H}(m|t)} = k^e r^{e\mathcal{H}(m|t)} = s^e$
+\end{itemize}
+\end{frame}
+
+\begin{section}{Secret Sharing - Threshold Cryptosystems}
+\begin{frame}{Διαμοιρασμός απορρήτων - Εισαγωγή}
+\alert{Το πρόβλημα}\\
+Κλειδιά: κρίσιμα κρυπτογραφικά δεδομένα (όχι τα μόνα)\\
+\medskip
+\pause
+Για παράδειγμα: ιδιωτικό κλειδί
+\begin{itemize}
+\item Δύναμη αποκρυπτογράφησης
+\item Δύναμη υπογραφής
+\end{itemize}
+\medskip
+\pause
+\green{Λύση}\\
+Δεν θέλουμε να είναι στην φυσική κατοχή μίας οντότητας (μόνο)
+
+Διαμοιρασμός απορρήτων (Secret Sharing) \\
+\pause
+\green{Επιπλέον}\\
+
+Βασικό συστατικό Secure Multi Party Computation
+\end{frame}
+
+\begin{frame}{Additive secret sharing}
+Έστω $(\mathbb{G},+)$ μια ομάδα και $s \in \mathbb{G}$ το μυστικό το οποίο θέλουμε να μοιράσουμε σε $n$ παίκτες
+
+\begin{itemize}
+
+\pause
+\item Διαλέγουμε τυχαία $s_1, \cdots s_{n-1} \in \mathbb{G}$
+
+\pause
+\item Θέτουμε $s_n = s - \sum_{i=1}^{n-1} s_i$
+
+\pause
+\item Μοιράζουμε τα $\{ s_i \}_{i=1}^n$ στους παίκτες
+
+\pause
+\item Ανακατασκευή $s = \sum_{i=1}^n s_i$
+
+\end{itemize}
+
+\pause
+\alert{Πρόβλημα:} Ένας παίκτης μπορεί να ακυρώσει την ανακατασκευή 
+\end{frame}
+
+\begin{frame}{Threshold Secret Sharing}
+\blue{$(t,n)$ threshold secret sharing}
+\begin{itemize}
+\item Ένα μυστικό $s$ πρέπει να μοιραστεί σε $n$ παίκτες $P_1, P_2, \cdots P_n$ ώστε:
+\pause
+\begin{itemize}
+\item Οποιοδήποτε υποσύνολο από τουλάχιστον $t+1$ παίκτες να μπορεί να το ανακτήσει
+\pause
+\item Κανένα υποσύνολο με $t$ παίκτες να μην μπορεί
+\pause
+\end{itemize}
+\item \green{Υπόθεση} Εμπιστεύομαστε τον διανομέα $D$ και τους παίκτες
+\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Shamir Secret Sharing}
+
+\begin{block}{Πολυωνυμική παρεμβολή}
+\begin{itemize}
+\item Έστω ένα πολυώνυμο βαθμού $t$: $f(x) = a_0+a_1x+\cdots+a_tx^t$
+\item Μπορεί να ανακατασκευαστεί από $t+1$ σημεία $(x_i,f(x_i))$ με διαφορετικές τετμημένες
+\item Υπάρχουν άπειρα πολυώνυμα βαθμού $t+1$ που περνούν από 
+$t+1$ τέτοια σημεία
+\item Ανάκτηση πολυωνύμου: συντελεστές Lagrange
+\item $\lambda_i(x) = \prod_{k=0, k \neq i}^t \frac{x-x_k}{x_i-x_k}$
+\item Προκύπτει το $L(x) = \sum_{i=0}^t y_i \lambda_i(x) = y_0 \lambda_0(x) + y_1 \lambda_1(x) + \cdots y_t \lambda_t (x) $
+\item Αποδεικνύεται ότι είναι μοναδικό $L = f$
+\end{itemize}
+\end{block}
+\framebreak
+
+\includegraphics[scale=0.4]{polynomialinterpolation.png}
+
+\framebreak
+
+\begin{block}{Εφαρμογή στο διαμοιρασμό απορρήτων}
+Υποθέτουμε ότι διαθέτουμε έναν έμπιστο διανομέα:
+\begin{itemize}
+\item Επιλέγει και δημοσιοποιεί ένα πρώτο $p$
+\item Επιλέγει $t$ συντελεστές ενός πολυωνύμου βαθμού $t$ $\{a_t, \cdots a_1 \} \in_R \mathbb{Z}_p$
+\item Θέτει ως σταθερό όρο το μυστικό $s$
+\item Προκύπτει το πολυώνυμο $f(x) = a_t \cdot x^t +  a_{t-1} \cdot x^{t-1} + \cdots + a_{1} \cdot x + s \pmod{p}$
+\item $f(0)=s$
+\item Μοιράζει στον παίκτη $i$ την τιμή $(i,f(i))$
+\end{itemize}
+\end{block}
+
+\framebreak
+\begin{block}{Ανακατασκευή}
+\begin{itemize}
+\item Παρατήρηση: Δεν μας ενδιαφέρει να υπολογίσουμε το πολυώνυμο $f$ αλλά το $f(0)$
+\item Κάθε παίκτης $i$ υπολογίζει τους συντελεστές Lagrange
+\item $\lambda_i(0) = \prod_{k=1, k \neq i}^{t+1} \frac{-k}{i-k} \bmod{p}$
+\item $t+1$ παίκτες μπορούν να υπολογίσουν το $f(0)$ ως: $\sum_{i=1}^{t+1} f(i) \lambda_i(0) \bmod{p}$
+\item Ανακτούν το μυστικό υπολογίζοντας το $p(0)$
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Παρατηρήσεις I}
+\begin{itemize}
+\item Πληροφοριοθεωρητική ασφάλεια αν ο αντίπαλος διαθέτει λιγότερα μερίδια
+\pause
+\item Μπορούν να προστεθούν εύκολα καινούρια μερίδια, χωρίς να αλλάξουν τα παλιά: Υπολογισμός νέων σημείων
+\pause
+\item Εύκολη αντικατάσταση μεριδίων: Υπολογισμός νέων σημείων (πρέπει να γίνει ασφαλής καταστροφή των παλιών)
+\pause
+\item Σημαντικοί παίκτες: περισσότερα από ένα μερίδια
+\pause
+\item Αλλαγή Μεριδίων: Τροποποίηση πολυωνύμου χωρίς να αλλάξει το μυστικό
+\pause
+\item Ομομορφικές ιδιότητες (άθροισμά πολυωνύμων είναι πολυώνυμο) \\
+$s_1 + s_2 = f(0) + g(0) = (f+g)(0)$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Παρατηρήσεις II}
+\begin{itemize}
+\item Μειονεκτήματα: 'Εμπιστοσύνη
+\begin{itemize}
+\item Κακόβουλος διανομέας: Λανθασμένα μερίδια σε τμήμα των παικτών 
+\pause
+\item Κακόβουλος παίκτης: Παροχή λανθασμένων μεριδίων κατά τη διάρκεια της ανακατασκευής
+\pause
+\end{itemize}
+\item Λύση: Συνδυασμός με σχήμα δέσμευσης (Verifiable Secret Sharing)
+\pause
+\begin{itemize}
+\item Ο διανομέας μαζί με τα μερίδια παρέχει και δεσμεύσεις για τους συντελεστές
+\item Οι παίκτες επαληθεύουν ότι οι δεσμεύσεις δίνουν το σημείο τους
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Εφαρμογή: Threshold ElGamal I}
+\begin{itemize}
+\item Δημιουργία Κλειδιών
+\begin{itemize}
+\item Επιλογή δύο μεγάλων πρώτων $p,q$ ώστε $q \mid (p-1)$  
+\item Επιλογή της υποομάδας τάξης $q$ του $\mathbb{Z_p^*}$ και γεννήτορα $g$
+\item Επιλογή τυχαίου $x \in \mathbb{Z}_q$
+\item Κανονικός υπολογισμός δημοσίου κλειδιού $y = g^x \bmod{p}$
+
+\item Χρήση σχήματος Shamir για διαμοιρασμό του ιδιωτικού $x$ $\pmod{q}$
+\item Αποτέλεσμα \\ $\keygen(1^\lambda)=(y, \{ i, f(i) \}_{i=1}^n)$
+\end{itemize}
+\pause
+\item Κρυπτογράφηση
+\begin{itemize}
+\item Κανονικά \\ $\enc(y,m) = (G,M) = (g^r, m \cdot y^r)$
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Εφαρμογή: Threshold ElGamal II}
+\begin{itemize}
+\item Αποκρυπτογράφηση \\
+Σε δύο βήματα
+
+\begin{enumerate}
+\item \textbf{'Αποκρυπτογράφηση' μεριδίων}
+\begin{itemize}
+\item Κάθε παίκτης υπολογίζει και δημοσιοποιεί το $c_i=G^{f(i)} \bmod p$
+\end{itemize}
+\item \textbf{Συνδυασμός}
+\begin{itemize}
+\item Συγκεντρώνονται $t+1$ 'αποκρυπτογραφημένα' μερίδια $(i,c_i)$ τα οποία συνδυάζονται ως: \pause
+\begin{align*}
+C = \prod_i c_i ^ {\lambda_i(0)} = \prod_i G ^ {f(i) \lambda_i(0)} = \\
+G ^ {\sum_i f(i) \lambda_i(0))} = G^{f(0)} = \\ G^x
+\end{align*}
+όπου $\lambda_i$ οι συντελεστές Lagrange \pause
+\item Αποκρυπτογράφηση ως: \begin{align*}\frac{M}{C}\end{align*}
+\end{itemize}
+\end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Παρατηρήσεις}
+\begin{itemize}
+\item Υπολογιστική ασφάλεια ως προς τα $c_i$
+\pause
+\item Ίδια κρυπτογράφηση
+\pause
+\item Αποκρυπτογράφηση χωρίς ανακατασκευή του ιδιωτικού κλειδιού (δυνατότητα επαναχρησιμοποίησης)
+\end{itemize}
+\end{frame}
+
+\end{section}
+
+\begin{frame}[allowframebreaks]{Βιβλιογραφία}
+
+\begin{tiny}
+\begin{enumerate}
+\item St. Zachos and Aris Pagourtzis. Στοιχεία Θεωρίας Αριθμών και Εφαρμογές στην Κρυπτογραφία. Πανεπιστημιακές Σημειώσεις
+\item Jonathan Katz and Yehuda Lindell. Introduction to Modern Cryptography (Chapman and Hall/Crc Cryptography and Network Security Series). Chapman
+and Hall/CRC, 2007
+\item Paar, Christof, and Jan Pelzl. Understanding cryptography: a textbook for students and practitioners. Springer Science-Business Media, 2009.
+\item Kiayias, Aggelos  \href{http://crypto.di.uoa.gr/class/Kryptographia/Semeioseis_files/Cryptograph_Primitives_and_Protocols.pdf}{Cryptography primitives and protocols}, UoA, 2015
+\item \href{http://goo.gl/b75I29}{Nigel Smart. Introduction to cryptography} 
+\medskip
+\item M. Green \href{http://blog.cryptographyengineering.com/2011/09/what-is-random-oracle-model-and-why.html}{What is the Random Oracle Model and why should you care?}
+\item M. Bellare, P. Rogaway, (1993). "Random Oracles are Practical: A Paradigm for Designing Efficient Protocols". ACM Conference on Computer and Communications Security: 62–73.
+\item R. Canetti, O. Goldreich, and S. Halevi.  The random oracle methodology, revisited. Journal of the ACM, 51(4):557–594, 2004.
+\item Adi Shamir, \href{http://www5.in.tum.de/lehre/vorlesungen/konkr_math/WS_10_11/prog/shamir.pdf}{How to share a secret}.  Communications of the ACM 22.11 (1979): 612-613.
+\item Helger Lipmaa, 79.159 Cryptography and Data Security, 24.03.2004 Lecture 9: Secret Sharing, Threshold Cryptography, MPC 
+\item J. Kuhn \href{https://jeremykun.com/2014/06/23/the-mathematics-of-secret-sharing/}{The Mathematics of Secret Sharing}
+\end{enumerate}
+\end{tiny}
+\end{frame}
+
+\end{document}
