@@ -141,7 +141,7 @@ Efficiently verify the correctness of computations without executing them
 Client: its computing power should be confined to the bare minimum of sending $u$ and receiving $z$
 \end{frame}
 
-\begin{frame}{What zkSnarks offer}
+\begin{frame}{What zk-Snarks offer}
 \begin{itemize}
     \item \textbf{Z}ero \textbf{K}nowledge: The client (verifier \ver) learns nothing but the validity of the computation
     \item \textbf{S}uccinct: The proof is tiny compared to the computation 
@@ -630,7 +630,7 @@ Check:
     \end{block}   
 \end{frame}
 
-\begin{frame}{KoE Relation to zkSnarks}
+\begin{frame}{KoE Relation to zk-Snarks}
 There is no need to know $x$ in order to validate knowledge of exponent:
 \begin{align*}
 e(h,c) = e(g,y) = e(g,g)^{sx}
@@ -1059,7 +1059,7 @@ To achieve this we replace $H = \enc(h(x_0))$ in the CRS accordingly
 \begin{itemize}
     \item zk-SNARKs for a general purpose CPU
     \item Circuit generator: Translate program execution into sequence of circuits
-    \item Compose zkSNARKs for these circuits
+    \item Compose zk-SNARKs for these circuits
     \item Bound on the running time
 \end{itemize}
 \end{frame}
