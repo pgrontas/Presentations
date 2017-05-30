@@ -771,7 +771,7 @@ if and only if there exist coefficients $(c^{N+1},\cdots,c^m)$ such that $t(x)$ 
 \begin{align*}
 p(x) = (v_0(x)+\sum_{k=1}^m c_k v_k(x)) \cdot (w_0(x)+  \sum_{k=1}^m c_k w_k(x))\\ - (y_0(x)+\sum_{k=1}^m c_k y_k(x))
 \end{align*}
- 
+For simplicity: $v(x)= v_0(x)+\sum_{k=1}^m c_k v_k(x)$ etc.
 \end{frame}
 
 \section{The Proof}
@@ -897,13 +897,12 @@ Prove that you executed f with input = $3$
     \end{block}
     \begin{itemize}
         \item Use Lagrange interpolation to transform the sets of $m$ vectors with $n$ elements into $n$ polynomials of degree $m-1$
-        \item Construct polynomial $a_j(i) =A[i][j]$ (value element of vector $i$ in position $j$)
+        \item Construct polynomial $a_j$ with values $a_j(i) =A[i][j]$ (value element of vector $i$ in position $j$)
         \item For instance: $a_1(1) = 0, a_1(2) = 0, a_1(3)=0, a_1(4) = 5$
         \item $a_1(x) = \frac{5}{6}x^3-5x^2+\frac{55}{6}x-5$ or in vector form $\bm{a}_1 = [-5,\frac{55}{6},-5,\frac{5}{6}]$
+        \item $a_2(1) = 1, a_2(2) = 0, a_2(3)=1, a_2(4) = 0$
+        \item $a_2(x) = -\frac{2}{3}x^3+5x^2+\frac{34}{3}x+8$ or in vector form $\bm{a}_1 = [8,\frac{34}{3},5,\frac{2}{3}]$
         \item Repeat for $\bm{B}, \bm{C}$
-        \item Compute $t = A \cdot s \times B \cdot s - C \cdot s$
-        \item Compute $h$ from $t,A,B,C$ using FFT 
-        \item Compute $a_i, b_i$ from the input
     \end{itemize}
 \end{frame}
  

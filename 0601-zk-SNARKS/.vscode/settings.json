@@ -1,0 +1,35 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "latex-workshop.latex.toolchain": [
+  {
+    "command": "xelatex",
+    "args": [
+      "-synctex=1",
+      "-interaction=nonstopmode",
+      "-file-line-error",
+      "%DOC%"
+    ]
+  }, {
+    "command": "bibtex",
+    "args": [
+      "%DOCFILE%"
+    ]
+  }, {
+    "command": "xelatex",
+    "args": [
+      "-synctex=1",
+      "-interaction=nonstopmode",
+      "-file-line-error",
+      "%DOC%"
+    ]
+  }, {
+    "command": "xelatex",
+    "args": [
+      "-synctex=1",
+      "-interaction=nonstopmode",
+      "-file-line-error",
+      "%DOC%"
+    ]
+  }
+]
+}
