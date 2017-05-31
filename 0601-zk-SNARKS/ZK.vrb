@@ -4,7 +4,7 @@ Convert code into a format that contains only commands of the form:
         \item \texttt{x=y}
         \item \texttt{x=y op z}
     \end{itemize}
-
+    \pause
     As a result the function $f$ becomes:
    \begin{python}
         def f(x):

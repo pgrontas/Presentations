@@ -1,13 +1,13 @@
 \beamer@sectionintoc {1}{Introduction}{2}{0}{1}
-\beamer@sectionintoc {2}{Prerequisites}{7}{0}{2}
-\beamer@subsectionintoc {2}{1}{ZK Proofs}{7}{0}{2}
-\beamer@subsectionintoc {2}{2}{Cryptography}{23}{0}{2}
-\beamer@subsubsectionintoc {2}{2}{1}{Pairings}{25}{0}{2}
-\beamer@sectionintoc {3}{The Proof}{40}{0}{3}
-\beamer@subsectionintoc {3}{1}{R1CS}{42}{0}{3}
-\beamer@subsectionintoc {3}{2}{QSP}{46}{0}{3}
-\beamer@subsectionintoc {3}{3}{zkSNARK}{47}{0}{3}
-\beamer@sectionintoc {4}{Applications}{58}{0}{4}
-\beamer@subsectionintoc {4}{1}{Verifying cloud computations}{58}{0}{4}
-\beamer@subsectionintoc {4}{2}{zCash}{60}{0}{4}
-\beamer@sectionintoc {5}{References}{67}{0}{5}
+\beamer@sectionintoc {2}{Prerequisites}{27}{0}{2}
+\beamer@subsectionintoc {2}{1}{ZK Proofs}{27}{0}{2}
+\beamer@subsectionintoc {2}{2}{Cryptography}{92}{0}{2}
+\beamer@subsubsectionintoc {2}{2}{1}{Pairings}{98}{0}{2}
+\beamer@sectionintoc {3}{The Proof}{124}{0}{3}
+\beamer@subsectionintoc {3}{1}{R1CS}{129}{0}{3}
+\beamer@subsectionintoc {3}{2}{QAP}{142}{0}{3}
+\beamer@subsectionintoc {3}{3}{zkSNARK}{156}{0}{3}
+\beamer@sectionintoc {4}{Applications}{196}{0}{4}
+\beamer@subsectionintoc {4}{1}{Verifying cloud computations}{196}{0}{4}
+\beamer@subsectionintoc {4}{2}{zCash}{198}{0}{4}
+\beamer@sectionintoc {5}{References}{216}{0}{5}

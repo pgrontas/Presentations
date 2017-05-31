@@ -1,4 +1,4 @@
-\documentclass[handout]{beamer}
+\documentclass[handouts]{beamer}
 \usepackage{amsmath,amssymb,amsthm,array}
 \usepackage{bm}
 \usepackage{multirow}
@@ -117,11 +117,11 @@ showstringspaces=false            %
 \begin{block}{zkSnark}
 \textbf{Z}ero \textbf{K}nowledge \textbf{S}uccinct \textbf{N}on \textbf{I}nteractive \textbf{A}rguments Of \textbf{K}nowledge
 \end{block}
-
+\pause
 \begin{block}{Use}
 Efficiently verify the correctness of computations without executing them
 \end{block}
-
+\pause
 \begin{block}{Applications}
 \begin{itemize}
     \item Verify cloud computations (centralised, decentralised)
@@ -132,55 +132,56 @@ Efficiently verify the correctness of computations without executing them
 
 \begin{frame}{Application Model}
 \begin{itemize}
-    \item A client owns input $u$ (e.g query)
-    \item A server owns a private input $w$ (e.g. private DB)
-    \item The client wishes to learn $z=f(u,w)$ for a function $f$ known to both
-    \item Client: computation correctness (integrity)
-    \item Server: private input confidentiality
+    \item A client owns input $u$ (e.g query) \pause
+    \item A server owns a private input $w$ (e.g. private DB) \pause
+    \item The client wishes to learn $z=f(u,w)$ for a function $f$ known to both \pause
+    \item Client: computation correctness (integrity) \pause
+    \item Server: private input confidentiality \pause
 \end{itemize}
 Client: its computing power should be confined to the bare minimum of sending $u$ and receiving $z$
 \end{frame}
 
 \begin{frame}{What zk-Snarks offer}
 \begin{itemize}
-    \item \textbf{Z}ero \textbf{K}nowledge: The client (verifier \ver) learns nothing but the validity of the computation
-    \item \textbf{S}uccinct: The proof is tiny compared to the computation 
+    \item \textbf{Z}ero \textbf{K}nowledge: The client (verifier \ver) learns nothing but the validity of the computation \pause
+    \item \textbf{S}uccinct: The proof is tiny compared to the computation \pause
     \begin{itemize}
         \item the proof size is constant $O_{\lambda}(1)$ (depends only on the security parameter $\lambda$)
         \item verification time is $O_{\lambda}(|f| + |u| + |z|)$ and does not depend on the running time of $f$
-    \end{itemize}
-    \item \textbf{N}on \textbf{I}nteractive: The proofs are created without interaction with the verifier and are publicly verifiable strings
-    \item \textbf{A}rguments: Soundness is guaranteed only against a computationally bounded server (prover \prv)
+    \end{itemize} \pause
+    \item \textbf{N}on \textbf{I}nteractive: The proofs are created without interaction with the verifier and are publicly verifiable strings \pause
+    \item \textbf{A}rguments: Soundness is guaranteed only against a computationally bounded server (prover \prv) \pause
     \item of \textbf{K}nowledge: The proof cannot be constructed without access to a witness
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Position in the complexity landscape...}
     \begin{itemize}
-        \item $NP = PCP[O(logn),O(1)]$
-        \item $NP \subseteq ZK$ (Goldreich, Micali, Wigderson)
-        \item We can use PCP to construct ZK proofs (in theory)
-        \item The proofs are hugely inefficient
-        \item Can we construct better SNARKs without using PCPs?
+        \item $NP = PCP[O(logn),O(1)]$ \pause
+        \item One-Way Functions $ \Rightarrow NP \subseteq ZK$ (Goldreich, Micali, Wigderson) (ZKP for 3-COL) \pause
+        \item We can use PCP to construct ZK proofs (in theory) \pause
+        \item The proofs are hugely inefficient \pause
+        \item Can we construct better SNARKs without using PCPs? \pause
         \item Yes, using QSPs and QAP - a better characterisation of NP and cryptographic assumptions
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Main idea} 
+\begin{tiny}
 \begin{enumerate}
 \item Transform the verification of the computation to checking a relation between \emph{secret} polynomials: 
-\begin{align*}\textrm{computation validity} \leftrightarrow p(x)q(x)=s(x)r(x) \end{align*}
+\begin{align*}\textrm{computation validity} \leftrightarrow p(x)q(x)=s(x)r(x) \end{align*} \pause
 \item The verifier chooses a random evaluation point that must be kept \emph{secret}: 
-\begin{align*} p(x_0)q(x_0)=s(x_0)r(x_0) \end{align*}
+\begin{align*} p(x_0)q(x_0)=s(x_0)r(x_0) \end{align*} \pause
 \item Homomorphic Encryption to compute the evaluation of the polynomials at $x_0$ by using $\enc(x_0)$:
 \begin{align*}\enc(p(x_0))\enc(q(x_0))=\enc(s(x_0))\enc(r(x_0))
-\end{align*}
-\item Blinding for ZK:
+\end{align*} \pause
+\item Randomise for ZK:
 \begin{align*}
-\enc(p(x_0))\enc(q(x_0)) k =\enc(s(x_0))\enc(r(x_0)) k 
+\enc(k+p(x_0))\enc(k+q(x_0))   =\enc(k+s(x_0))\enc(k_ r(x_0))   
 \end{align*}
 \end{enumerate}
-
+\end{tiny}
 \end{frame}
 
 \section{Prerequisites}
@@ -245,11 +246,11 @@ A breakthrough with many theoretical and practical applications
 \begin{frame}{Definitions: Notation}
 
 \begin{itemize}
-\item Language $ \mathcal{L} \in \mathtt{NP}$
-\item Polynomial Turing Machine $\mathcal{M}$
-\item $x \in \mathcal{L} \Leftrightarrow \exists w \in \{0,1\}^{p(|x|)}: M(x,w) = 1$
-\item 2 PPT TM \prv, \ver
-\item $<\mathcal{P}(x,w), \mathcal{V}(x)>$ is the interaction between  \prv, \ver with common public input $x$ and private \prv input $w$.
+\item Language $ \mathcal{L} \in \mathtt{NP}$ \pause
+\item Polynomial Turing Machine $\mathcal{M}$ \pause
+\item $x \in \mathcal{L} \Leftrightarrow \exists w \in \{0,1\}^{p(|x|)}: M(x,w) = 1$ \pause
+\item 2 PPT TM \prv, \ver \pause
+\item $<\mathcal{P}(x,w), \mathcal{V}(x)>$ is the interaction between  \prv, \ver with common public input $x$ and private \prv input $w$. \pause
 \item $out_\mathcal{V}{<\mathcal{P}(x,w), \mathcal{V}(x)>}$ is the output of \ver at the end of the protocol
 \end{itemize}
 \end{frame}
@@ -261,13 +262,13 @@ An honest \prv, convinces an \emph{honest} \ver with certainty:
 If  $x \in \mathcal{L}$ and $M(x,w) = 1$ then:
 $ Pr[out_{\mathcal{V}}<\mathcal{P}(x,w), \mathcal{V}(x)>(x)=1] = 1  $
 \end{block}
-
+\pause
 \begin{block}{Properties:Soundness}
 A \emph{malicious} $\mathcal{P}$ ($\mathcal{P}^*$),  only convinces an honest \ver, with negligible probability.
 If $x \notin \mathcal{L}$ τότε $\forall (\mathcal{P}^*,w)$: 
 $ Pr[out_{\mathcal{V}}<\mathcal{P}^*(x,w), \mathcal{V}(x)>(x)=1] = negl(\lambda) $ 
 \end{block}
-
+\pause
 \textbf{Note: }\\
 Proof of Knowledge: $\mathcal{P}^*$ is \alert{not} PPT. \\
 Argument of Knowledge: O $\mathcal{P}^*$  is PPT.
@@ -275,10 +276,9 @@ Argument of Knowledge: O $\mathcal{P}^*$  is PPT.
 
 \begin{frame}{Properties:(Perfect) Zero Knowledge}
 
+\ver does not gain any more knowledge than the validity of the \prv's claim. \pause
  
-\ver does not gain any more knowledge than the validity of the \prv's claim .
- 
-\blue{For each $\mathcal{V}^*$} \magenta{there is a PPT \siml}: 
+\blue{For each $\mathcal{V}^*$} \magenta{there is a PPT \siml}: \pause
 
 If  $x \in \mathcal{L}$ and $M(x,w) = 1$ the random variables:
 
@@ -287,9 +287,9 @@ $ out_{\mathcal{V}^*}<\mathcal{P}(x,w), \mathcal{V}^*(x)>(x) $ and
 $ out_{\mathcal{V}^*}<\mathcal{S}(x), \mathcal{V}^*(x)>(x) $ 
 
 follow the same distribution:
-
+\pause
 We allow a \alert{malicious verifier} that does not follow the protocol and cheats in order to learn $w$
- 
+\pause
 \begin{block}{Intuition}
 What ever the \ver can learn after interacting with the \prv, can be learnt by interacting with \siml (disregarding \prv)
 
@@ -341,13 +341,13 @@ Because he cannot distinguish between \prv (with the witness) and \siml (without
 \end{frame}
 
 \begin{frame}{$\Sigma$ - protocols}
-A 3 round protocol with an honest verifier and special soundness
+A 3 round protocol with an honest verifier and special soundness \pause
 \begin{enumerate}
 	\item \textbf{Commit} \prv commits to a value
 	\item \textbf{Challenge} \ver selects a random challenge \emph{uniformly} from a challenge space (honest) 
 	\item \textbf{Response} \prv responds using the commitment, the witness and the random challenge.
 \end{enumerate}
-
+\pause
 \begin{block}{Special Soundness}
 Two execution of the protocol with the same commitment reveal the witness
 \end{block}
@@ -364,7 +364,7 @@ Two execution of the protocol with the same commitment reveal the witness
 \begin{block}{Goal}
 Proof of knowledge of $x$ without releasing any more information
 \end{block}
- 
+
 \framebreak
 
 \begin{columns}
@@ -377,9 +377,9 @@ Proof of knowledge of $x$ without releasing any more information
 \item Compute $y = g^t \bmod{p}$. 
 \item Send $y$  to \ver. 
 \end{itemize}
-\item \textbf{Challenge (\ver $\rightarrow$ \prv):} \\  Select and challenge with $c \in_R \zs{q}$
-\item \textbf{Response (\prv $\rightarrow$ \ver):} \\   \prv computes $s=t+cx \bmod{q}$ and sends it to \ver
-\item \ver accepts iff \\ $g^s = yh^c \pmod{p}$
+\item \textbf{Challenge (\ver $\rightarrow$ \prv):} \\  Select and challenge with $c \in_R \zs{q}$ 
+\item \textbf{Response (\prv $\rightarrow$ \ver):} \\   \prv computes $s=t+cx \bmod{q}$ and sends it to \ver 
+\item \ver accepts iff \\ $g^s = yh^c \pmod{p}$ 
 \end{itemize}
 \end{small}
 \column{0.5\textwidth}
@@ -396,19 +396,19 @@ Proof of knowledge of $x$ without releasing any more information
     \begin{center}
     $g^s = g^{t+cx} = g^t g^{cx} = yh^c \pmod{p}$
     \end{center}
-
+ 
 \item \textbf{Soundness} 
 Probability that \prv$^*$ cheats an honest verifier: $\frac{1}{q}$ - negligible - repeat to decrease
-\pause
+ 
 \item \textbf{Special soundness}
 Let $(y,c,s)$ nad  $(y,c',s')$ be two successful protocol transcripts
-\pause
+ 
 \begin{align*}
  g^s = yh^c  \text{ και }  g^{s'} = yh^{c'}  \Rightarrow  g^s h^{-c}   = g^{s'} h^{-c'}  \Rightarrow \\
  g^{s-xc} = g^{s'-xc'} \Rightarrow  s-xc = s'-xc' \Rightarrow  
  x = \frac{c'-c}{s-s}
 \end{align*}
-\pause
+ 
 Since \prv can answer these 2 questions he knows DLOG of $h$
 \end{itemize}
 
@@ -417,16 +417,16 @@ Since \prv can answer these 2 questions he knows DLOG of $h$
 \textbf{Zero knowledge}: \alert{no}
  
 \begin{itemize}
-\item A cheating verifier does not choose randomly  \pause
-\item but bases each challenge to the commitment received before \siml \pause
-\item In the simulated execution it will switch challenge \pause
-\item \siml will not be able to respond \pause
+\item A cheating verifier does not choose randomly  
+\item but bases each challenge to the commitment received before \siml  
+\item In the simulated execution it will switch challenge  
+\item \siml will not be able to respond 
 \end{itemize}
 
-How to add ZK: \pause
+How to add ZK:  
 
 \begin{itemize}
-\item \ver commits to randomness before the first message by  \prv or \pause
+\item \ver commits to randomness before the first message by  \prv or 
 \item Challenge space $\{ 0 , 1 \} $ 
 \begin{itemize}
 \item In this case \ver has only two options. 
@@ -439,12 +439,12 @@ How to add ZK: \pause
 It provides \green{Honest Verifier Zero Knowledge}. Let  \siml without knowledge of the witness $x$ and an honest \ver 
  
 \begin{itemize}
-\item \siml follows the protocol and commits to $y=g^t, t \in_R \zs{q}$
-\item \ver selects $c \in_R \zs{q}$
-\item If \siml can answer (which occurs with negligible probability) the protocol resumes normally  
-\item Else the \ver is rewound (with the same random tape)  
-\item \ver selects the same $c \in_R \zs{q}$ (because the random tape has not changed)  
-\item \siml sends $s=t$. \ver will accept since $yh^{c} = g^t  h^{-c} h^{c} = g^t = g^s$ 
+\item \siml follows the protocol and commits to $y=g^t, t \in_R \zs{q}$  
+\item \ver selects $c \in_R \zs{q}$  
+\item If \siml can answer (which occurs with negligible probability) the protocol resumes normally    
+\item Else the \ver is rewound (with the same random tape)    
+\item \ver selects the same $c \in_R \zs{q}$ (because the random tape has not changed)   
+\item \siml sends $s=t$. \ver will accept since $yh^{c} = g^t  h^{-c} h^{c} = g^t = g^s$  
 \end{itemize}
   
 The conversations $(t \in_R \mathbb{Z}_q; g^t h^{-c}   , c \in_R \mathbb{Z}_q  , t )$ 
@@ -457,11 +457,11 @@ $(t,c \in_R \mathbb{Z}_q;  g^t  , c  , t+xc  )$
 \begin{block}{Question}
 Can we do away with \ver?
 \end{block}
-
-\prv generates the proof by himself
-
+\pause
+\prv generates the proof by himself \\
+\pause
 The proof is verifiable by anyone
-
+\pause
 \begin{block}{Fiat Shamir Transform}
 Replace the challenge with the output of a pseudorandom function on the commitment
 
@@ -495,11 +495,11 @@ The Prover:
 \end{frame} 
 
 \begin{frame}{The common reference string}
-Both parties have access to a string of random data
+Both parties have access to a string of (random) data \\
 
-This is created in a trusted way (e.g. through a secure multiparty computation protocol)
+This is created in a trusted way (e.g. through a secure multiparty computation protocol) \\
 
-The prover simulates the verifier challenge by selecting random data
+The prover simulates the verifier challenge by selecting data from the CRS
 \end{frame}
 
 \subsection{Cryptography}
@@ -508,11 +508,11 @@ The prover simulates the verifier challenge by selecting random data
     Applying a function on the ciphertexts yields the encryption of a function on the plaintext
     \begin{align*}
     \enc(m_1) \otimes \enc(m_2) = \enc(m_1 \oplus m_2)
-    \end{align*}
+    \end{align*} \pause
     Multiplicative Homomorphism in El Gamal:
     \begin{align*}
     \enc(m_1) \cdot \enc(m_2) = (g^{r_1},m_1 h^{r_1}) \cdot (g^{r_2},m_2 h^{r_2}) \\ = (g^{r_1 + r_2}, (m_1 \cdot m_2) h^{r_1 + r_2})
-    \end{align*} 
+    \end{align*} \pause
     Additive Homomorphism in El Gamal:
     \begin{align*}
     \enc(m_1) \cdot \enc(m_2) = (g^{r_1},g^{m_1} h^{r_1}) \cdot (g^{r_2},g^{m_2} h^{r_2}) \\ = (g^{r_1 + r_2}, g^{m_1 + m_2} h^{r_1 + r_2})
@@ -524,13 +524,13 @@ The prover simulates the verifier challenge by selecting random data
     Let $\enc(x) = g^x$ where $g$ is a suitable group generator and $p(x)=\sum_{i=0}^d a_i x^i$ a polynomial \\
     
     Two parties with knowledge of $x_0$ and $p(x)$ respectively can compute $\enc(p(x_0))$
-    \end{block}
+    \end{block} \pause
 
     \begin{itemize}
    
     \item The \ver (the party that knows $x_0$) releases 
     \begin{align*}\enc(x_0^0), \enc(x_0^1), \cdots, \enc(x_0^d)\end{align*} 
-    into the common reference string
+    into the common reference string \pause
     \item The \prv (the party that knows the coefficients) computes:  
     \begin{align*}\prod_{i=0}^d \enc(x_0^i)^{a_i} = \enc(\sum_{i=0}^{d} a_i x_0^i) = \enc(p(x_0))  \end{align*} 
 
@@ -542,9 +542,9 @@ The prover simulates the verifier challenge by selecting random data
 \begin{block}{In general}
 Functions that map elements from source groups $\mathcal{G}_1,\mathcal{G}_2$ or $\mathcal{G}^2$ to a destination group $\mathcal G_T$.
 \end{block}
-
+\pause
 \emph{What is interesting}: They transform difficult problems in $\mathcal G$ to easy problems in $\mathcal G_T$. 
-
+\pause
 \begin{block}{Definition}
 A pairing is an efficiently calculable function $e : \mathcal G \times \mathcal G \rightarrow \mathcal G_T$ st:
 \begin{itemize}
@@ -568,7 +568,7 @@ Compare with $e(g,g^c)=e(g,g)^c$
 
 but the CDH remains hard
 \end{block}
-
+\pause
 \begin{block}{Observation}
 The pairing allows us to do a multiplication between 'encrypted' values
 \end{block}
@@ -576,13 +576,13 @@ The pairing allows us to do a multiplication between 'encrypted' values
 
 \begin{frame}[allowframebreaks]{Application - check the correct evaluation of polynomials}
 \begin{itemize}
-    \item The \ver that knows $x_0$:
+    \item The \ver that knows $x_0$:  
      \begin{itemize}
-        \item computes and publishes into the CRS: \begin{align*} \enc(x_0^0), \enc(x_0^1), \cdots, \enc(x_0^d) \end{align*}
-        \item selects a scaling factor $b$
-        \item computes and publishes into the CRS: \begin{align*} \enc(bx_0^0), \enc(bx_0^1), \cdots, \enc(bx_0^d) \end{align*}
+        \item computes and publishes into the CRS: \begin{align*} \enc(x_0^0), \enc(x_0^1), \cdots, \enc(x_0^d) \end{align*}  
+        \item selects a scaling factor $b$  
+        \item computes and publishes into the CRS: \begin{align*} \enc(bx_0^0), \enc(bx_0^1), \cdots, \enc(bx_0^d) \end{align*}  
     \end{itemize} 
-    \item The \prv that knows $p(x)$:
+    \item The \prv that knows $p(x)$:  
     \begin{itemize}
         \item computes and publishes $\enc(p(x_0)), \enc(bp(x_0))$
     
@@ -593,13 +593,13 @@ The pairing allows us to do a multiplication between 'encrypted' values
 \framebreak 
 Check:
 \begin{itemize}
-    \item Use a pairing function $e$ to compute:
+    \item Use a pairing function $e$ to compute:  
     \begin{itemize}
         \item $e(\enc(p(x_0)),\enc(b)) = e(g,g)^{bp(x_0)}$
         \item $e(\enc(bp(x_0)),\enc(1)) = e(g,g)^{bp(x_0)}$
     \end{itemize}
 \end{itemize}
-         
+        
 \begin{block}{Observation}
 \begin{itemize}
     \item The homomorphic combination of encrypted polynomials allows us to do additions
@@ -609,23 +609,23 @@ Check:
 \end{block}
 \end{frame}
 
-\begin{frame}{A 'new' security assumption}
-    \begin{block}{Knowledge of exponents (Damgard 1991)}
+\begin{frame}[allowframebreaks]{A 'new' security assumption}
     Let $\mathbb{G}$ a group of order $q$ generated by $g$ and $x \in_R \mathbb{Z}_q$. Let $h = g^x$
+    \begin{block}{Knowledge of exponents (Damgard 1991)} 
     
     For any adversary $\mathcal{A}(q,g,h)$ that outputs a value $(c,y)$ such that $y=c^x$,
     there exists an extractor $\mathcal{B}$ who on input $\mathcal{B}(q,g,h)$ 
     outputs $s$: $c=g^s$
     \end{block}
-    \pause
+    \framebreak
     \begin{block}{Intuition}
         \begin{itemize}
-            \item The exponent in question is $s$
-            \item Since $y=c^x$ and we do not know $x$ the only way to have come up with $(c,y)$ is 
+            \item The exponent in question is $s$  
+            \item Since $y=c^x$ and we do not know $x$ the only way to have come up with $(c,y)$ is  
                   through $s$
-            \item That is: $c=g^s$ and $y=h^s$
-            \item Between ZKP of DLOG equality and double DLOG knowledge
-            \item Non standard, but cannot be derived from standard assumptions such as the DDH.
+            \item That is: $c=g^s$ and $y=h^s$  
+            \item Between ZKP of DLOG equality and double DLOG knowledge  
+            \item Non standard, but cannot be derived from standard assumptions such as the DDH.  
         \end{itemize}
     \end{block}   
 \end{frame}
@@ -635,7 +635,7 @@ There is no need to know $x$ in order to validate knowledge of exponent:
 \begin{align*}
 e(h,c) = e(g,y) = e(g,g)^{sx}
 \end{align*}
-
+\pause
 \begin{block}{The correspondence}
 $C=\enc(p(x_0))=g^{p(x_0)}$ and \\
 $Y=\enc(bp(x_0))=g^{bp(x_0)}$
@@ -656,39 +656,41 @@ If it does not hold then a cheating prover might come up with $Y$ without knowin
 \end{frame}
 
 \begin{frame}{Evaluate polynomials and check in ZK}
-ZK: \ver must not even learn $\enc(p(x_0))$ 
+\begin{small}
+ZK: \ver must not even learn $\enc(p(x_0))$  \pause
 \begin{itemize}
     \item \ver selects $b,x_0$ and computes:   \begin{align*}
         \enc(x_0^0),\enc(x_0^1),\cdots \enc(x_0^d)    \\
-         \enc(bx_0^0),\enc(bx_0^1),\cdots \enc(bx_0^d) \end{align*}
-    \item \prv selects $a$ and computes:  
+         \enc(bx_0^0),\enc(bx_0^1),\cdots \enc(bx_0^d) \end{align*} \pause
+    \item \prv selects $a$ and computes:  \pause
         \begin{align*}
         \enc(a)\enc(p(x_0)) = \enc(a+p(x_0)) \\
         \enc(b)^a \enc(bp(x_0)) = \enc(ba)\enc(bp(x_0)) = \enc(b(a+p(x_0))))
-        \end{align*}
+        \end{align*} \pause
     \item Check the pairing step as before:
         \begin{align*}
         e(\enc(a+p(x_0)),\enc(b))=e(g,g)^{b(a+p(x_0))} \\
         e(\enc(b(a+p(x_0))),\enc(1))=e(g,g)^{b(a+p(x_0))} 
         \end{align*}
 \end{itemize}
+\end{small}
 \end{frame}
 
 \begin{frame}{R1CS}
 
 \begin{block}{Definition}
-A system of rank-1 quadratic equations over $\mathbb{F}$ is a set of constraints $C  = \{ (\bm{a}_j, \bm{b}_j, \bm{c}_j) \}_{i=1}^{N_c} $ and $n \in \mathbb{N}$ where:
+A system of rank-1 quadratic equations over $\mathbb{F}$ is a set of constraints $\{ (\bm{v}_j, \bm{w}_j, \bm{y}_j) \}_{i=1}^{N_c} $ and $n \in \mathbb{N}$ where:
 \begin{itemize}
-    \item $\bm{a}_j,\bm{b}_j,\bm{c}_j \in \mathbb{F}^{1+N_v}$
+    \item $\bm{v}_j,\bm{w}_j,\bm{y}_j \in \mathbb{F}^{1+N_v}$
     \item $n \leq N_v$
 \end{itemize}
 \end{block}
-
+\pause
 \begin{block}{Satisfiability}
-A R1 system $C$ is satisfiable on input $\bm{x} \in \mathbb{F}^n$ if there is a witness $s \in \mathbb{F}^{N_v}:$
+A R1 system $C$ is satisfiable on input $\bm{c} \in \mathbb{F}^n$ if there is a witness $s \in \mathbb{F}^{N_v}:$
 \begin{itemize}
-    \item $\bm{x} = (s_1, \cdots, s_n)$
-    \item $\forall j \in N_c:  \bm{a}_j \cdotp (1,\bm{s})  \times  \bm{b}_j \cdotp (1,\bm{s})  =  \bm{c}_j \cdotp (1,\bm{s})$
+    \item $\bm{c} = (c_1, \cdots, c_n)$
+    \item $\forall j \in N_c:  \bm{v}_j \cdotp (1,\bm{c})  \times  \bm{w}_j \cdotp (1,\bm{c})  =  \bm{y}_j \cdotp (1,\bm{c})$
 \end{itemize}
 \end{block}  
 \end{frame}
@@ -699,7 +701,7 @@ Boolean circuit $C: \{0,1\}^n \times \{0,1\}^h \times \{0,1\}$ with $\alpha$ wir
 $\rightarrow$
 R1CS with with $N_v = \alpha$ and $N_c = \beta + h+1$
 \end{block}
-
+\pause
 \begin{block}{AC to R1CS}
 Arithmetic circuit $C: \mathbb{F}^n \times \mathbb{F}^h \times \mathbb{F}^l$ with $\alpha$ wires and $\beta$ (bilinear) gates 
 $\rightarrow$
@@ -713,15 +715,15 @@ R1CS with with $N_v = \alpha$ and $N_c = \beta + l$
 \begin{block}{Definition}
 A QSP over a field $\mathbb{F}$ for inputs of length $n$ consists of
 \begin{itemize}
-    \item 2 sets of source polynomials: $\mathcal{V} = \{v_0, \cdots, v_m \}, \{ w_0, \cdots, w_m \}$
-    \item the target polynomial: $t$
-    \item an injective function $f : [n] \times \{0,1\} \rightarrow [m]$
+    \item 2 sets of source polynomials: $\mathcal{V} = \{v_0, \cdots, v_m \}, \{ w_0, \cdots, w_m \}$  
+    \item the target polynomial: $t$ \pause
+    \item an injective function $f : [n] \times \{0,1\} \rightarrow [m]$  
 \end{itemize}
 \end{block}
 
 \framebreak 
 \begin{block}{QSP Verification}
-An input $u \in \{0,1\}^n$ is accepted by a QSP iff $\exists$ tuples 
+An input $u \in \{0,1\}^n$ is accepted by a QSP iff $\exists$ tuples  
 $a = (a_1, \cdots, a_m)$, $b = (b_1, \cdots, b_m) \in \mathbb{F}^m:$
 
 \begin{itemize}
@@ -739,14 +741,14 @@ $a = (a_1, \cdots, a_m)$, $b = (b_1, \cdots, b_m) \in \mathbb{F}^m:$
 Remarks: 
 
 \begin{itemize}
-    \item Check if a target polynomial divides a linear combination of some given polynomials
-    \item $f$ restricts which polynomials can be used in the linear combination
-    \item The NP witness are the $a,b$
-    \item QSP Verification is NP-Complete 
+    \item Check if a target polynomial divides a linear combination of some given polynomials  
+    \item $f$ restricts which polynomials can be used in the linear combination  
+    \item The NP witness are the $a,b$  
+    \item QSP Verification is NP-Complete  
     \item In practice:
     \begin{itemize}
         \item Find $h: th = v_a \cdot w_b \Leftrightarrow th - v_a \cdot w_b = \textbf{0}$       
-        \item Check that it is a zero polynomial
+        \item Check that it is a zero polynomial  
         \item Evaluate at a single point $t(x_0)h(x_0) - v_a(x_0) \cdot w_b(x_0) = 0$ (The number of roots is tiny compared to the number of field elements)
      \end{itemize}
 \end{itemize} 
@@ -754,20 +756,19 @@ Remarks:
 
 \begin{frame}[allowframebreaks]{Quadratic Arithmetic Programs}
 \begin{block}{Definition}
-A QAP $\mathcal{Q}$ over a field $\mathbb{F}$ is:
+A QAP $\mathcal{Q}$ over a field $\mathbb{F}$ is:  
 \begin{itemize}
-    \item 3 sets of source polynomials $\mathcal{V} = \{v_0, \cdots, v_m \}$, $\mathcal{W} = \{ w_0, \cdots, w_m \}$, $\mathcal{Y}  = \{y_0, \cdots, y_m \}$
-    \item the target polynomial $t$
+    \item 3 sets of source polynomials $\mathcal{V} = \{v_0, \cdots, v_m \}$, $\mathcal{W} = \{ w_0, \cdots, w_m \}$, $\mathcal{Y}  = \{y_0, \cdots, y_m \}$  
+    \item the target polynomial $t$  
     \item a function $f : \{0,1\}^n \rightarrow \{0,1\}^{n'}$
 \end{itemize}
 \end{block}
 
 \framebreak
 
-$\mathcal{Q}$ computes $f$ if:
+$\mathcal{Q}$ computes $f$ if:  
  $ (c_1, \cdots ,c_{n+n'}) \in \mathbb{F}^{n+n'}$ is a valid assignment of
-$f$’s inputs and outputs which happens
-if and only if there exist coefficients $(c^{N+1},\cdots,c^m)$ such that $t(x)$ divides $p(x)$ where:
+$f$’s inputs and outputs and there exist coefficients $(c^{N+1},\cdots,c^m)$ such that $t(x)$ divides $p(x)$ where:
 \begin{align*}
 p(x) = (v_0(x)+\sum_{k=1}^m c_k v_k(x)) \cdot (w_0(x)+  \sum_{k=1}^m c_k w_k(x))\\ - (y_0(x)+\sum_{k=1}^m c_k y_k(x))
 \end{align*}
@@ -782,13 +783,13 @@ For simplicity: $v(x)= v_0(x)+\sum_{k=1}^m c_k v_k(x)$ etc.
 Code $\rightarrow$ Algebraic Circuit $\rightarrow$ R1CS 
 $\rightarrow$ QAP $\rightarrow$ ZKSnark
 \end{block}
-
+\pause
 \begin{python}
     def f(x): 
         y=x**3 
         return x+y+5   
 \end{python}
-
+\pause
 \begin{block}{Task}
 Prove that you executed f with input = $3$
 \end{block}
@@ -800,7 +801,7 @@ Prove that you executed f with input = $3$
         \item \texttt{x=y}
         \item \texttt{x=y op z}  
     \end{itemize}
-    
+    \pause
     As a result the function $f$ becomes:    
    \begin{python}
         def f(x): 
@@ -815,11 +816,11 @@ Prove that you executed f with input = $3$
 \begin{frame}{Convert to R1CS} 
 \begin{block}{Rules}
     \begin{itemize}
-        \item Each command can be considered as a logic gate and represented as a relation between vectors
-        \item The vectors have as many elements as the total number of variables in the command plus one (for constants)
-        \item Mapping vector $ [ one,  x,  out,  sym_1,  y,  sym_2 ] $
-        \item Vector $\bm{c}$ is the left hand side
-        \item Vector $\bm{a}, \bm{b}$ are the right hand sides
+        \item Each command can be considered as a logic gate and represented as a relation between vectors \pause
+        \item The vectors have as many elements as the total number of variables in the command plus one (for constants) \pause
+        \item Mapping vector $ [ one,  x,  out,  sym_1,  y,  sym_2 ] $ \pause
+        \item Vector $\bm{y}$ is the left hand side \pause
+        \item Vector $\bm{v}, \bm{w}$ are the right hand sides \pause
     \end{itemize}  
 \end{block}
 
@@ -829,27 +830,29 @@ Prove that you executed f with input = $3$
 \begin{frame}{Application to example commands}   
     \begin{columns}[T] % align columns
     \begin{column}{.48\textwidth}
-        \begin{block}{Command}sym_1 = x * x\end{block}
+        \begin{block}{Command}sym_1 = x * x\end{block} \pause
         
         \begin{align*}        
              [ &one,&x,&out,&sym_1,&y,&sym_2 ]\\
-             \bm{a} = [&0,&1,&0,&0,&0,&0]  \\
-             \bm{b} = [&0,&1,&0,&0,&0,&0]  \\
-             \bm{c} = [&0,&0,&0,&1,&0,&0] 
+             \bm{v} = [&0,&1,&0,&0,&0,&0]  \\
+             \bm{w} = [&0,&1,&0,&0,&0,&0]  \\
+             \bm{y} = [&0,&0,&0,&1,&0,&0] 
         \end{align*}
         
-        Indeed $s = [1,3,0,9,0,0]$ satisfies: $\bm{s} \bigcdot \bm{a} \cdot \bm{s} \bigcdot \bm{b} - \bm{s} \bigcdot \bm{c} = 0$   
+        Indeed $c = [1,3,0,9,0,0]$ satisfies: $\bm{c} \bigcdot \bm{v} \cdot \bm{c} \bigcdot \bm{w} - \bm{c} \bigcdot \bm{y} = 0$   
     \end{column}%
     \hfill%
     \begin{column}{.48\textwidth}
-        \begin{block}{Command}y = sym1 * x\end{block}
+        \begin{block}{Command}y = sym1 * x\end{block} \pause
         
         \begin{align*}        
               [ &one,&x,&out,&sym_1,&y,&sym_2 ]\\
-             \bm{a} = [&0,&0,&0,&1,&0,&0]  \\
-             \bm{b} = [&0,&1,&0,&0,&0,&0]  \\
-             \bm{c} = [&0,&0,&0,&0,&1,&0] 
+             \bm{v} = [&0,&0,&0,&1,&0,&0]  \\
+             \bm{w} = [&0,&1,&0,&0,&0,&0]  \\
+             \bm{y} = [&0,&0,&0,&0,&1,&0] 
         \end{align*}    
+
+        $c = [1,3,0,9,27,0]$
 \end{column}%
 \end{columns} 
 \end{frame}
@@ -861,11 +864,12 @@ Prove that you executed f with input = $3$
     
     \begin{align*}       
          [ &one,&x,&out,&sym_1,&y,&sym_2 ]\\ 
-         \bm{a} &= [&0,&1,&0,&0,&1,&0]  \\ 
-         \bm{b} &= [&1,&0,&0,&0,&0,&0]  \\
-         \bm{c} &= [&0,&0,&0,&0,&0,&1] 
-    \end{align*}    
+         \bm{v} &= [&0,&1,&0,&0,&1,&0]  \\ 
+         \bm{w} &= [&1,&0,&0,&0,&0,&0]  \\
+         \bm{y} &= [&0,&0,&0,&0,&0,&1] 
+    \end{align*}    \pause
     Remark: addition is implied in the dot product
+    $c = [1,3,0,9,27,30]$
     \end{column}%
     \hfill%
     \begin{column}{.48\textwidth}
@@ -873,9 +877,9 @@ Prove that you executed f with input = $3$
     
     \begin{align*}     
          [ &one,&x,&out,&sym_1,&y,&sym_2 ]\\    
-         \bm{a} = [&5,&0,&0,&0,&0,&1]  \\
-         \bm{b} = [&1,&0,&0,&0,&0,&0]  \\
-         \bm{c} = [&1,&0,&0,&0,&0,&0] 
+         \bm{v} = [&5,&0,&0,&0,&0,&1]  \\
+         \bm{w} = [&1,&0,&0,&0,&0,&0]  \\
+         \bm{y} = [&1,&0,&0,&0,&0,&0] 
     \end{align*}    
     \end{column}%
 \end{columns} 
@@ -883,79 +887,86 @@ Prove that you executed f with input = $3$
 
 \begin{frame}{The final R1CS}
     \begin{align*}        
-         \bm{A} = \{[0,1,0,0,0,0], [0,0,0,1,0,0],[0,1,0,0,1,0],[5,0,0,0,0,1]  \}\\
-         \bm{B} = \{[0,1,0,0,0,0],[0,1,0,0,0,0],[1,0,0,0,0,0] ,[1,0,0,0,0,0]  \}\\
-         \bm{C} = \{[0,0,0,1,0,0], [0,0,0,0,1,0], [0,0,0,0,0,1] ,[1,0,0,0,0,0]  \}
+         \bm{V} = \{[0,1,0,0,0,0], [0,0,0,1,0,0],[0,1,0,0,1,0],[5,0,0,0,0,1]  \}\\
+         \bm{W} = \{[0,1,0,0,0,0],[0,1,0,0,0,0],[1,0,0,0,0,0] ,[1,0,0,0,0,0]  \}\\
+         \bm{Y} = \{[0,0,0,1,0,0], [0,0,0,0,1,0], [0,0,0,0,0,1] ,[1,0,0,0,0,0]  \}
     \end{align*}  
-    The execution is the vector  $\bm{s} = [1,3,35,9,27,30] $
+    \pause
+    The solution is the vector  $\bm{c} = [1,3,35,9,27,30] $
 \end{frame}
 
-\subsection{QSP}
+\subsection{QAP}
 \begin{frame}{From Vectors To Polynomials}
-    \begin{block}{Why?}
-        Because we can check all the constraints simultaneously!
-    \end{block}
     \begin{itemize}
-        \item Use Lagrange interpolation to transform the sets of $m$ vectors with $n$ elements into $n$ polynomials of degree $m-1$
-        \item Construct polynomial $a_j$ with values $a_j(i) =A[i][j]$ (value element of vector $i$ in position $j$)
-        \item For instance: $a_1(1) = 0, a_1(2) = 0, a_1(3)=0, a_1(4) = 5$
-        \item $a_1(x) = \frac{5}{6}x^3-5x^2+\frac{55}{6}x-5$ or in vector form $\bm{a}_1 = [-5,\frac{55}{6},-5,\frac{5}{6}]$
-        \item $a_2(1) = 1, a_2(2) = 0, a_2(3)=1, a_2(4) = 0$
-        \item $a_2(x) = -\frac{2}{3}x^3+5x^2+\frac{34}{3}x+8$ or in vector form $\bm{a}_1 = [8,\frac{34}{3},5,\frac{2}{3}]$
-        \item Repeat for $\bm{B}, \bm{C}$
+        \item Use Lagrange interpolation to transform the sets of $m$ vectors with $n$ elements into $n$ polynomials of degree $m-1$ \pause
+        \item Construct polynomial $v_j$ with values $v_j(i) =V[i][j]$ (value element of vector $i$ in position $j$) \pause
+        \item For instance: $v_1(1) = 0, v_1(2) = 0, v_1(3)=0, v_1(4) = 5$ \pause
+        \item $v_1(x) = \frac{5}{6}x^3-5x^2+\frac{55}{6}x-5$ \pause
+        \item $v_2(1) = 1, a_2(2) = 0, a_2(3)=1, a_2(4) = 0$ \pause
+        \item $v_2(x) = -\frac{2}{3}x^3+5x^2+\frac{34}{3}x+8$ \pause
+        \item Repeat for $\bm{w}, \bm{y}$ \pause
+        \item Finally add the polynomials together to obtain $V,W,Y$ \pause
     \end{itemize}
 \end{frame}
- 
+
+\begin{frame}{From Vectors To Polynomials - Why?}
+\begin{itemize}
+    \item Why? Because we can check all the constraints simultaneously! \pause
+    \item $cV(x) \cdot cW(X) = cY(x)$ \pause
+    \item Define $t(x) = cV(x) \cdot cW(X) - cY(x)$ \pause
+    \item This polynomial must be zero to all the points that correspond to the logic gates \pause
+    \item A multiple of the base polynomial $(x-1)(x-2)...$
+\end{itemize}
+\end{frame}
 
 \subsection{zkSNARK}
 \begin{frame}[allowframebreaks]{Setup Phase} 
     \begin{itemize}
-        \item Public verifiability
-        \item Non interactive
-        \item Fix the homomorphic encryption scheme, verifier, polynomials 
-        \item \ver selects random field elements $x_0,b \in \mathbb{F}$
+        \item Non interactiveness - Public verifiability 
+        \item Fix the homomorphic encryption scheme, verifier, polynomials  
+        \item \ver selects random field elements $x_0,b \in \mathbb{F}$  
         \item computes and publishes in the CRS:
         \begin{itemize}
-            \item $\{ \enc(x_0^k) \}_{k=0}^d$
-            \item $\{ \enc(bx_0^k)\}_{k=0}^d$
-            \item $\{ \enc(v_k(x_0)),\enc(bv_k(x_0)) \}_{k=1}^m$
-            \item $\{ \enc(w_k(x_0)),\enc(bw_k(x_0)) \}_{k=1}^m$
-            \item $\{ \enc(y_k(x_0)),\enc(by_k(x_0)) \}_{k=1}^m$
+            \item $\{ \enc(x_0^k) \}_{k=0}^d$  
+            \item $\{ \enc(bx_0^k)\}_{k=0}^d$  
+            \item $\{ \enc(v_k(x_0)),\enc(bv_k(x_0)) \}_{k=1}^m$  
+            \item $\{ \enc(w_k(x_0)),\enc(bw_k(x_0)) \}_{k=1}^m$  
+            \item $\{ \enc(y_k(x_0)),\enc(by_k(x_0)) \}_{k=1}^m$  
             \item $\enc(t(x_0)), \enc(bt(x_0))$
         \end{itemize} 
 
         \framebreak
 
-        \item selects random field values $\gamma, \beta_v, \beta_w, \beta_y$ in order to ensure soundness (i.e. that the correct polynomials were evaluated)
-        \item computes and publishes in the CRS:
+        \item selects random field values $\gamma, \beta_v, \beta_w, \beta_y$ in order to ensure soundness (i.e. that the correct polynomials were evaluated) \pause
+        \item computes and publishes in the CRS: \pause
         \begin{itemize}
-            \item $\enc(\gamma), \enc(\beta_v \gamma), \enc(\beta_w \gamma), \enc(\beta_y \gamma)$
-            \item $\{ \enc( \beta_v v_k(x_0))\}_{k=1}^m$
-            \item $\{ \enc(\beta_w w_k(x_0))\}_{k=1}^m$
-            \item $\{ \enc(\beta_y y_k(x_0))\}_{k=1}^m$
-            \item $\enc(\beta_v t(x_0)), \enc(\beta_w t(x_0)), \enc(\beta_y t(x_0))$
+            \item $\enc(\gamma), \enc(\beta_v \gamma), \enc(\beta_w \gamma), \enc(\beta_y \gamma)$ \pause
+            \item $\{ \enc( \beta_v v_k(x_0))\}_{k=1}^m$ \pause
+            \item $\{ \enc(\beta_w w_k(x_0))\}_{k=1}^m$ \pause
+            \item $\{ \enc(\beta_y y_k(x_0))\}_{k=1}^m$ \pause
+            \item $\enc(\beta_v t(x_0)), \enc(\beta_w t(x_0)), \enc(\beta_y t(x_0))$ \pause
         \end{itemize} 
 
-        All computations in the proof must use only these elements
+        All computations in the proof must use only these elements \pause
     \end{itemize}
 \end{frame}
 
 \begin{frame}{The prover}
 \begin{itemize}
-    \item Evaluates the circuit for the function and obtains the output
-    \item As a result the \prv knows the values of $c_i$
-    \item Solves for $h$
+    \item Evaluates the circuit for the function and obtains the output \pause
+    \item As a result the \prv knows the values of $c_i$ \pause
+    \item Solves for $h$ \pause
     \item Define:
     \begin{itemize}
-        \item $I_{mid}$: the indices that are not in the image of $f$
-        \item $v_{mid}(x) = \sum_{k \in I_{mid}} c_k v_k(x)$
+        \item $I_{mid}$: the indices that are not in the image of $f$ \pause
+        \item $v_{mid}(x) = \sum_{k \in I_{mid}} c_k v_k(x)$ \pause
     \end{itemize}
-    \item Generate the proof (9 encrypted values):
+    \item Generate the proof (9 encrypted values): \pause
     \begin{itemize}
-        \item $V_{mid} = \enc(v_{mid}(x_0))$, $W = \enc(w(x_0))$, 
-        $Y=\enc(y(x_0))$, $H = \enc(h(x_0))$
-        \item $V_{mid}^{'} = \enc(b v_{mid}(x_0))$, $W^{'} = \enc(b w(x_0))$, $Y^{'}=\enc(by(x_0))$, $H^{'} = \enc(bh(x_0))$
-        \item $K = \enc(\beta_v v_{mid}(x_0) + \beta_w w(x_0)+\beta_y y(x_0)) $
+        \item $V_{mid} = \enc(v_{mid}(x_0))$, $W = \enc(w(x_0))$,  
+        $Y=\enc(y(x_0))$, $H = \enc(h(x_0))$ \pause
+        \item $V_{mid}^{'} = \enc(b v_{mid}(x_0))$, $W^{'} = \enc(b w(x_0))$, $Y^{'}=\enc(by(x_0))$, $H^{'} = \enc(bh(x_0))$ \pause
+        \item $K = \enc(\beta_v v_{mid}(x_0) + \beta_w w(x_0)+\beta_y y(x_0)) $ \pause
     \end{itemize}
     \item All these values can be computed by leveraging the homomorphic properties of the underlying cryptosystem from what is on the CRS 
 \end{itemize}
@@ -963,14 +974,14 @@ Prove that you executed f with input = $3$
 
 \begin{frame}{The verifier}
 \begin{itemize}
-    \item Computes $I_{mid}$ from the input $u$
-    \item Computes $\enc(v_{io}(x_0)) = \enc(\sum_{k \notin I_{mid}} c_k v_k(x_0))$
-    \item Verifies the following equations using the pairing function:
+    \item Computes $I_{mid}$ from the input $u$ \pause
+    \item Computes $\enc(v_{io}(x_0)) = \enc(\sum_{k \notin I_{mid}} c_k v_k(x_0))$ \pause
+    \item Verifies the following equations using the pairing function: \pause
     \begin{itemize}
-        \item $e(V_{mid}^{'},\enc(1)) = e(V_{mid},\enc(b))$ 
-        \item $e(W^{'},\enc(1)) = e(W,\enc(b))$,
-        \item $e(H^{'},\enc(1)) = e(H,\enc(b))$
-        \item $e(Y^{'},\enc(1)) = e(Y,\enc(b))$
+        \item $e(V_{mid}^{'},\enc(1)) = e(V_{mid},\enc(b))$ \pause
+        \item $e(W^{'},\enc(1)) = e(W,\enc(b))$, \pause
+        \item $e(H^{'},\enc(1)) = e(H,\enc(b))$ \pause
+        \item $e(Y^{'},\enc(1)) = e(Y,\enc(b))$ \pause
         \item For soundness check:\\
         $e(\enc(\gamma),K) = e(\enc(\beta_v \gamma),V_{mid}) \cdot e(\enc(\beta_w \gamma),W) \cdot e(\enc(\beta_y \gamma),Y)$  
         \item Check the QAP relation:\\
@@ -987,7 +998,7 @@ Prove that you executed f with input = $3$
     \\ e(g^{\gamma}, g^{\beta_v v_{mid}(x_0)+\beta_w w(x_0) + \beta_y y(x_0)}) =
     \\ e(g,g)^{\gamma \cdot (\beta_v v_{mid}(x_0) + \beta_w w(x_0) + \beta_y y(x_0))}
 \end{flalign*}
-
+\pause
 \begin{flalign*}  
     e(\enc(\beta_v \gamma),V_{mid}) \cdot  e(\enc(\beta_w \gamma),W) \cdot  e(\enc(\beta_y \gamma),Y) = 
     \\ e(\enc(\beta_v \gamma,\enc(v_{mid}(x_0))) e(\enc(\beta_w \gamma),\enc(w(x_0))) e(\enc(\beta_y \gamma),\enc(y(x_0))) = 
@@ -1005,13 +1016,13 @@ The parts of the left hand pairings:
 \enc(v_0(x_0) + v_{in}(x_0) + v_{mid}(x_0)) = \\ 
 \enc(v_0(x_0)+\sum_{i=1}^m c_i v_i(x_0)) = \enc(v(x_0))
 \end{align*}
-
+\pause
 \begin{align*}\small
 \enc(w_0(x_0))W= 
 \enc(w_0(x_0))\enc(w(x_0))=\\
 \enc(w_0(x_0)+\sum_{i=1}^m(c_i w_i(x_0)))=\enc(w(x_0))
 \end{align*}
-
+\pause
 \begin{align*}\small
 \enc(y_0(x_0))Y= 
 \enc(y_0(x_0))\enc(y(x_0))=\\
@@ -1032,10 +1043,10 @@ e(H,\enc(t(x_0)))=e(g^h(x_0),g^t(x_0))=e(g,g)^{h(x_0)t(x_0)}
 \begin{frame}{Intuition between soundness}
 The relation 
 $e(\enc(\gamma),K) = e(\enc(\beta_v \gamma),V_{mid}) \cdot e(\enc(\beta_w \gamma),W) \cdot e(\enc(\beta_y \gamma),Y)$
-protects from a prover that tries to cheat by using another polynomial.
+protects from a prover that tries to cheat by using another polynomial. \pause
 \begin{itemize}
-    \item The values $\beta_v, \beta_w, \beta_y$ do not appear in the CRS in isolation
-    \item The expression $\beta_v v_{mid}(x_0) + \beta_w w(x_0))+\beta_y y(x_0) $ can only be encrypted from the respected values in the CRS in encrypted form mixed with $\gamma$
+    \item The values $\beta_v, \beta_w, \beta_y$ do not appear in the CRS in isolation \pause
+    \item The expression $\beta_v v_{mid}(x_0) + \beta_w w(x_0))+\beta_y y(x_0) $ can only be encrypted from the respected values in the CRS in encrypted form mixed with $\gamma$ \pause
 \end{itemize}
 \end{frame}
 
@@ -1043,12 +1054,12 @@ protects from a prover that tries to cheat by using another polynomial.
 The \prv chooses $\delta_{mid}, \delta_w, \delta_y$. \\
 Define 
 \begin{itemize}
-\item $V_{\delta{mid}} = \enc(v_{mid}(x_0)+\delta_{mid}t(x_0))$
-\item $w_{\delta}(x_0) = w(x_0)+\delta_w t(x_0)$
-\item $y_{\delta}(x_0) = y(x_0)+\delta_y t(x_0)$
-\item As a result $V_{mid}$, $W$, $Y$ are randomised
+\item $V_{\delta{mid}} = \enc(v_{mid}(x_0)+\delta_{mid}t(x_0))$ \pause
+\item $w_{\delta}(x_0) = w(x_0)+\delta_w t(x_0)$ \pause
+\item $y_{\delta}(x_0) = y(x_0)+\delta_y t(x_0)$ \pause
+\item As a result $V_{mid}$, $W$, $Y$ are randomised \pause
 \end{itemize}
-The equation $v(x_0)w(x_0)-y(x_0)= h(x_0)t(x_0)$ must still hold
+The equation $v(x_0)w(x_0)-y(x_0)= h(x_0)t(x_0)$ must still hold \pause
 
 To achieve this we replace $H = \enc(h(x_0))$ in the CRS accordingly
 
@@ -1056,10 +1067,10 @@ To achieve this we replace $H = \enc(h(x_0))$ in the CRS accordingly
 
 \begin{frame}{vnTinyRAM}
 \begin{itemize}
-    \item zk-SNARKs for a general purpose CPU
-    \item Circuit generator: Translate program execution into sequence of circuits
-    \item Compose zk-SNARKs for these circuits
-    \item Bound on the running time
+    \item zk-SNARKs for a general purpose CPU \pause
+    \item Circuit generator: Translate program execution into sequence of circuits \pause
+    \item Compose zk-SNARKs for these circuits \pause
+    \item Bound on the running time \pause
 \end{itemize}
 \end{frame}
 
@@ -1068,27 +1079,27 @@ To achieve this we replace $H = \enc(h(x_0))$ in the CRS accordingly
 \subsection{Verifying cloud computations}
 \begin{frame}[allowframebreaks]{Pinnochio: A cloud based lie detector}
 \begin{itemize}
-    \item General purpose computation validator
-    \item Client: represents functions as a public evaluation key
-    \item Client: provides input or ZKPoK of some property of the input
-    \item Server: evaluates the computation and provides proof (signature)
-    \item Compiler toolchain to use with C-programs
-    \item Transforms to QAP, QSP
+    \item General purpose computation validator  
+    \item Client: represents functions as a public evaluation key   
+    \item Client: provides input or ZKPoK of some property of the input 
+    \item Server: evaluates the computation and provides proof (signature)  
+    \item Compiler toolchain to use with C-programs  
+    \item Transforms to QAP, QSP  
     \item Use:
     \begin{itemize}
-        \item Protect against malicious servers
-        \item Extra server feature (at a higher price)
+        \item Protect against malicious servers  
+        \item Extra server feature (at a higher price)  
     \end{itemize}
     \item Performance
     \begin{itemize}
-        \item Setup: Linear in the size of the computation
-        \item Proof Size: constant (288 bytes)
+        \item Setup: Linear in the size of the computation  
+        \item Proof Size: constant (288 bytes)  
     \begin{itemize}
-        \item Does not depend on function
-        \item Does not depend on input/output size
+        \item Does not depend on function  
+        \item Does not depend on input/output size  
     \end{itemize}
-        \item Verification: Linear in the size of the input and output typically 10ms (5 - 7 orders of magnitude gain)
-        \item Proof generation: up to 60 times fewer work
+        \item Verification: Linear in the size of the input and output typically 10ms (5 - 7 orders of magnitude gain) 
+        \item Proof generation: up to 60 times fewer work  
     \end{itemize}
     %\includegraphics
 \end{itemize}
@@ -1096,51 +1107,50 @@ To achieve this we replace $H = \enc(h(x_0))$ in the CRS accordingly
 
 \subsection{zCash}
 \begin{frame}[allowframebreaks]{Bitcoin's problem}
-    Bitcoin is not anonymous
+    Bitcoin is not anonymous  
     \begin{itemize}
-        \item All transactions are recorded in the blockchain
-        \item Users use pseudonyms
-        \item Deanonymization
+        \item All transactions are recorded in the blockchain  
+        \item Users use pseudonyms  
+        \item Deanonymization  
         \begin{itemize}
-            \item The structure of the transaction graph
-            \item Real world information (value, dates, blockchain exit points) 
+            \item The structure of the transaction graph  
+            \item Real world information (value, dates, blockchain exit points)  
         \end{itemize} 
     \end{itemize}
-    Bitcoins are not fully fungible
+    Bitcoins are not fully fungible(?)  
     \begin{itemize}
         \item In the protocol itself all coins have the same value
     \end{itemize}
     
     but...
-    \framebreak
-
+    \framebreak 
    
     \begin{itemize}
-        \item Each coin has a history than can be traced
-        \item This might have an effect on the ability to spend the coins or on their value (e.g. Wanacry ransomware)
+        \item Each coin has a history than can be traced  
+        \item This might have an effect on the ability to spend the coins or on their value (e.g. Wannacry ransomware)  
     \end{itemize}
 
-    A first solutions: mixes
+    A first solutions: mixes  
     \begin{itemize}
-        \item Users entrust their coins to a 'trusted' entity
-        \item They receive coins with the same value but different origins
-        \item Many problems (fees, delays, trust)
+        \item Users entrust their coins to a 'trusted' entity  
+        \item They receive coins with the same value but different origins  
+        \item Many problems (fees, delays, trust) 
     \end{itemize}
 \end{frame}
 
 \begin{frame}{ZeroCoin}
     \begin{itemize} 
-    \item A decentralised mix
-    \item Two kinds of coins: base and anonymous
-    \item Each anonymous transaction is accompanied by a ZK proof that the coin spent can be linked to a valid base coin
+    \item A decentralised mix \pause
+    \item Two kinds of coins: base and anonymous \pause
+    \item Each anonymous transaction is accompanied by a ZK proof that the coin spent can be linked to a valid base coin \pause
     \begin{itemize} 
-        \item The base coin comes from a valid transaction
-        \item The base coin is unspent
+        \item The base coin comes from a valid transaction \pause
+        \item The base coin has not been spent \pause
     \end{itemize}
     \item Problems:
         \begin{itemize}
-            \item Performance bottleneck for ZK proofs
-            \item Functionality: Does not support all denominations etc.
+            \item Performance bottleneck for ZK proofs \pause
+            \item Functionality: Does not support all denominations etc. \pause
             \item Anonymity: Does not hide metadata
         \end{itemize}
     \end{itemize}
@@ -1152,11 +1162,11 @@ To achieve this we replace $H = \enc(h(x_0))$ in the CRS accordingly
         \item Performance
         \begin{itemize}
             \begin{itemize}
-                 \item 288 byte proof
-                 \item 895MB CRS
-                 \item transaction < 1KB (vs 45KB in Zerocoin)
-                 \item 6ms verification (vs 450ms in Zerocoin)
-                 \item 1min to make a transaction
+                 \item 288 byte proof \pause
+                 \item 895MB CRS \pause
+                 \item transaction < 1KB (vs 45KB in Zerocoin) \pause
+                 \item 6ms verification (vs 450ms in Zerocoin) \pause
+                 \item 40sec to make a transaction
             \end{itemize}
         \end{itemize}
     \end{itemize}
@@ -1170,26 +1180,26 @@ To achieve this we replace $H = \enc(h(x_0))$ in the CRS accordingly
             \item All shares of $x_0$ must be later destroyed
             \item A single honest participant is required
         \end{itemize}
-    \end{block}
+    \end{block} \pause
     \framebreak
     \begin{block}{The protocol}
         \begin{itemize}
-            \item Each participant generates a random $s_i$
-            \item The first participant computes and publishes $g^{s_1}, \cdots, g^{s_1^d}$  
-            \item The second partipant computes $g^{s_1 \textbb{s_2}}, \cdots, g^{s_1^d \textbb{s_2}^d}$
-            \item $\cdots$
-            \item The last participant computes $g^{s_1 s_2 \cdots \textbb{s_n}}, \cdots, g^{s_1^d s_2^d \cdots \textbb{s_n}^d}$
-            \item $x_0 = s_1 s_2 \cdots \textbb{s_n}$
+            \item Each participant generates a random $s_i$  
+            \item The first participant computes and publishes $g^{s_1}, \cdots, g^{s_1^d}$    e
+            \item The second partipant computes $g^{s_1 \textbb{s_2}}, \cdots, g^{s_1^d \textbb{s_2}^d}$  
+            \item $\cdots$  
+            \item The last participant computes $g^{s_1 s_2 \cdots \textbb{s_n}}, \cdots, g^{s_1^d s_2^d \cdots \textbb{s_n}^d}$  
+            \item $x_0 = s_1 s_2 \cdots \textbb{s_n}$  
         \end{itemize} 
     \end{block}
     \framebreak
     \begin{block}{Validation}
          A partipant might cheat by computing $g^{s_p \cdot s_i^`}$. validation can be done using pairings.
          \begin{itemize}
-            \item $e(g^{s_i},g^{s_i})=e(g,g)^{s_i^2}$
-            \item $e(g,g^{s_i^2})=e(g,g)^{s_i^2}$
+            \item $e(g^{s_i},g^{s_i})=e(g,g)^{s_i^2}$  
+            \item $e(g,g^{s_i^2})=e(g,g)^{s_i^2}$  
          \end{itemize}
-         This check is repeat for all powers
+         This check is repeated for all powers 
     \end{block}
 \end{frame}
 
