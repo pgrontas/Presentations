@@ -1,4 +1,4 @@
-\documentclass[handouts]{beamer}
+\documentclass[handout]{beamer}
 \usepackage{amsmath,amssymb,amsthm,array}
 \usepackage{bm}
 \usepackage{multirow}
@@ -905,15 +905,15 @@ Prove that you executed f with input = $3$
         \item $v_2(1) = 1, a_2(2) = 0, a_2(3)=1, a_2(4) = 0$ \pause
         \item $v_2(x) = -\frac{2}{3}x^3+5x^2+\frac{34}{3}x+8$ \pause
         \item Repeat for $\bm{w}, \bm{y}$ \pause
-        \item Finally add the polynomials together to obtain $V,W,Y$ \pause
+        \item Finally add the polynomials together to obtain $v,w,y$ \pause
     \end{itemize}
 \end{frame}
 
 \begin{frame}{From Vectors To Polynomials - Why?}
 \begin{itemize}
     \item Why? Because we can check all the constraints simultaneously! \pause
-    \item $cV(x) \cdot cW(X) = cY(x)$ \pause
-    \item Define $t(x) = cV(x) \cdot cW(X) - cY(x)$ \pause
+    \item $cv(x) \cdot cw(X) = cy(x)$ \pause
+    \item Define $t(x) = cv(x) \cdot cw(X) - cy(x)$ \pause
     \item This polynomial must be zero to all the points that correspond to the logic gates \pause
     \item A multiple of the base polynomial $(x-1)(x-2)...$
 \end{itemize}
@@ -958,7 +958,7 @@ Prove that you executed f with input = $3$
     \item Solves for $h$ \pause
     \item Define:
     \begin{itemize}
-        \item $I_{mid}$: the indices that are not in the image of $f$ \pause
+        \item $I_{mid}$: the indices that are not in IO of $f$ ($ \{ N+1 \cdots m \} $) \pause
         \item $v_{mid}(x) = \sum_{k \in I_{mid}} c_k v_k(x)$ \pause
     \end{itemize}
     \item Generate the proof (9 encrypted values): \pause
@@ -974,7 +974,7 @@ Prove that you executed f with input = $3$
 
 \begin{frame}{The verifier}
 \begin{itemize}
-    \item Computes $I_{mid}$ from the input $u$ \pause
+    \item Retrieves the values of $c_i$ from the input $u$ and the output \pause
     \item Computes $\enc(v_{io}(x_0)) = \enc(\sum_{k \notin I_{mid}} c_k v_k(x_0))$ \pause
     \item Verifies the following equations using the pairing function: \pause
     \begin{itemize}
@@ -985,7 +985,7 @@ Prove that you executed f with input = $3$
         \item For soundness check:\\
         $e(\enc(\gamma),K) = e(\enc(\beta_v \gamma),V_{mid}) \cdot e(\enc(\beta_w \gamma),W) \cdot e(\enc(\beta_y \gamma),Y)$  
         \item Check the QAP relation:\\
-        $\frac{e(\enc(v_0(x_0))\cdot \enc(v_{in}(x_0)) \cdot V_{mid},\enc(w_0(x_0)W))}{e(y_0(x_0)Y,\enc(1))} = e(H,\enc(t(x_0))$  
+        $\frac{e(\enc(v_0(x_0))\cdot \enc(v_{io}(x_0)) \cdot V_{mid},\enc(w_0(x_0)W))}{e(y_0(x_0)Y,\enc(1))} = e(H,\enc(t(x_0))$  
     \end{itemize}
 \end{itemize}
 \end{frame}
@@ -1011,9 +1011,9 @@ Prove that you executed f with input = $3$
 The parts of the left hand pairings:
 \begin{align*}
 \small
-\enc(v_0(x_0)) \enc(v_{in}(x_0)) V_{mid} = \\
-\enc(v_0(x_0)) \enc(v_{in}(x_0)) \enc(v_{mid}(x_0)) = \\
-\enc(v_0(x_0) + v_{in}(x_0) + v_{mid}(x_0)) = \\ 
+\enc(v_0(x_0)) \enc(v_{io}(x_0)) V_{mid} = \\
+\enc(v_0(x_0)) \enc(v_{io}(x_0)) \enc(v_{mid}(x_0)) = \\
+\enc(v_0(x_0) + v_{io}(x_0) + v_{mid}(x_0)) = \\ 
 \enc(v_0(x_0)+\sum_{i=1}^m c_i v_i(x_0)) = \enc(v(x_0))
 \end{align*}
 \pause
