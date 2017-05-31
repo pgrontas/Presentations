@@ -31,7 +31,7 @@
   \end{beamercolorbox}}%
   \vskip0pt%
 }
-\institute{NTUA}
+\institute{NTUA-advTCS}
  
  \hypersetup{
   pdfauthor={Panagiotis Grontas},
@@ -743,7 +743,7 @@ Remarks:
 \begin{itemize}
     \item Check if a target polynomial divides a linear combination of some given polynomials  
     \item $f$ restricts which polynomials can be used in the linear combination  
-    \item The NP witness are the $a,b$  
+    \item The NP witness is the pair $a,b$  
     \item QSP Verification is NP-Complete  
     \item In practice:
     \begin{itemize}
@@ -927,7 +927,7 @@ Prove that you executed f with input = $3$
         \item \ver selects random field elements $x_0,b \in \mathbb{F}$  
         \item computes and publishes in the CRS:
         \begin{itemize}
-            \item $\{ \enc(x_0^k) \}_{k=0}^d$  
+            \item $\{ \enc(x_0^k) \}_{k=0}^d$  (in reality: d = $2 \cdot 10^6$)
             \item $\{ \enc(bx_0^k)\}_{k=0}^d$  
             \item $\{ \enc(v_k(x_0)),\enc(bv_k(x_0)) \}_{k=1}^m$  
             \item $\{ \enc(w_k(x_0)),\enc(bw_k(x_0)) \}_{k=1}^m$  
@@ -948,10 +948,13 @@ Prove that you executed f with input = $3$
         \end{itemize} 
 
         All computations in the proof must use only these elements \pause
+
+        Performance: $O(|C|)$
     \end{itemize}
 \end{frame}
 
 \begin{frame}{The prover}
+\begin{tiny}
 \begin{itemize}
     \item Evaluates the circuit for the function and obtains the output \pause
     \item As a result the \prv knows the values of $c_i$ \pause
@@ -969,7 +972,9 @@ Prove that you executed f with input = $3$
         \item $K = \enc(\beta_v v_{mid}(x_0) + \beta_w w(x_0)+\beta_y y(x_0)) $ \pause
     \end{itemize}
     \item All these values can be computed by leveraging the homomorphic properties of the underlying cryptosystem from what is on the CRS 
+    \item Performance: $O(|C|)+O(|C|log^2(|C|)$
 \end{itemize}
+\end{tiny}
 \end{frame}
 
 \begin{frame}{The verifier}
@@ -1009,35 +1014,30 @@ Prove that you executed f with input = $3$
 
 \begin{frame}[allowframebreaks]{Completeness for the QAP Relation}
 The parts of the left hand pairings:
+\begin{small}
 \begin{align*}
-\small
-\enc(v_0(x_0)) \enc(v_{io}(x_0)) V_{mid} = \\
+\enc(v_0(x_0)) \enc(v_{io}(x_0)) V_{mid} = 
 \enc(v_0(x_0)) \enc(v_{io}(x_0)) \enc(v_{mid}(x_0)) = \\
-\enc(v_0(x_0) + v_{io}(x_0) + v_{mid}(x_0)) = \\ 
+\enc(v_0(x_0) + v_{io}(x_0) + v_{mid}(x_0)) = 
 \enc(v_0(x_0)+\sum_{i=1}^m c_i v_i(x_0)) = \enc(v(x_0))
 \end{align*}
-\pause
-\begin{align*}\small
+
+\begin{align*}
 \enc(w_0(x_0))W= 
 \enc(w_0(x_0))\enc(w(x_0))=\\
 \enc(w_0(x_0)+\sum_{i=1}^m(c_i w_i(x_0)))=\enc(w(x_0))
 \end{align*}
-\pause
-\begin{align*}\small
+
+\begin{align*}
 \enc(y_0(x_0))Y= 
 \enc(y_0(x_0))\enc(y(x_0))=\\
 \enc(y_0(x_0)+\sum_{i=1}^m(c_i y_i(x_0)))=\enc(y(x_0))
 \end{align*}
+\end{small}
 
-\framebreak
-Left hand side:
-\begin{align*}
-e(\enc(v_a(x_0)),\enc(w_b(x_0)))=e(g,g)^{v(x_0) \cdot w(x_0) - y(x_0)}
-\end{align*}
-Right hand side:
-\begin{align*}
-e(H,\enc(t(x_0)))=e(g^h(x_0),g^t(x_0))=e(g,g)^{h(x_0)t(x_0)}
-\end{align*}
+Left hand side: $e(\enc(v(x_0)),\enc(w(x_0)))=e(g,g)^{v(x_0) \cdot w(x_0) - y(x_0)}$\\ 
+
+Right hand side: $e(H,\enc(t(x_0)))=e(g^h(x_0),g^t(x_0))=e(g,g)^{h(x_0)t(x_0)}$
 \end{frame}
 
 \begin{frame}{Intuition between soundness}
