@@ -1,0 +1,7 @@
+\beamer@sectionintoc {1}{DLP}{3}{0}{1}
+\beamer@sectionintoc {2}{Το κρυπτοσύστημα ElGamal}{18}{0}{2}
+\beamer@sectionintoc {3}{Cramer-Shoup cryptosystem}{30}{0}{3}
+\beamer@sectionintoc {4}{DLP-based Commitment Schemes}{35}{0}{4}
+\beamer@sectionintoc {5}{Ελλειπτικές καμπύλες}{40}{0}{5}
+\beamer@sectionintoc {6}{Πρακτικά Θέματα}{59}{0}{6}
+\beamer@sectionintoc {7}{Πηγές}{62}{0}{7}
