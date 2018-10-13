@@ -1,3 +1,0 @@
-\beamer@sectionintoc {1}{Secure Multi Party Computation}{3}{0}{1}
-\beamer@sectionintoc {2}{Secret Sharing - Threshold Cryptosystems}{4}{0}{2}
-\beamer@sectionintoc {3}{Oblivious Transfer}{20}{0}{3}
