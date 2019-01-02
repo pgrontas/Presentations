@@ -1,6 +1,5 @@
 \documentclass[handout]{beamer}
-\usepackage{pgfpages}
-\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+
 \usepackage{amsmath,amssymb,amsthm,array}
 \usepackage{bm}
 \usepackage{multirow}
@@ -12,25 +11,25 @@
 \usepackage[normalem]{ulem}
 \usepackage{fontspec}
 \usepackage{numprint}
+ 
 
 \setmainfont{CMU Serif}
 \setsansfont{CMU Sans Serif}
 \newfontfamily{\greekfont}{CMU Serif}
 \newfontfamily{\greekfontsf}{CMU Sans Serif}
 
-\usetheme{Rochester}
-\usecolortheme{beaver}
+\usetheme{metropolis} 
 
 \setbeamertemplate{navigation symbols}{}
-\title{Κρυπτο Ψηφοφορίες}
+\title{Κρυπτό-Ψηφοφορίες}
 \author{Παναγιώτης Γροντάς}
-\date{19/12/2017}
+\date{18/12/2018}
 \defbeamertemplate*{footline}{shadow theme}
 {%
-	\leavevmode%
-	\hbox{
+  \leavevmode%
+  \hbox{
 		\begin{beamercolorbox}[wd=.4\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
-			\usebeamerfont{title in head/foot} Cryptographic Voting  %
+			\usebeamerfont{title in head/foot} Cryptovoting  %
 		\end{beamercolorbox}
 		\begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
 			\usebeamerfont{title in head/foot} \hfill \insertsection  %
@@ -38,17 +37,17 @@
 		\begin{beamercolorbox}[wd=.1\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm plus1fil,rightskip=.3cm]{author in head/foot}%
 			\usebeamerfont{author in head/foot}\insertframenumber\,/\,\inserttotalframenumber
 		\end{beamercolorbox}%
-	}%
-	\vskip0pt%
+  }%
+  \vskip0pt%
 }
-\institute{ΕΜΠ - Κρυπτογραφία - (2017-2018)}
+\institute{ΕΜΠ - Κρυπτογραφία (2018-2019)}
 
  \hypersetup{
   pdfauthor={Panagiotis Grontas},
-  pdftitle={Electronic Voting},
+  pdftitle={Cryptovoting},
   colorlinks=true,
   urlcolor=blue,
-  linkcolor=white
+  pdfborderstyle={/S/U/W 1}	% border style will be underline of width 1pt
 }
 
 \setlength{\columnseprule}{0.4pt}
@@ -90,11 +89,11 @@
 
 \begin{frame}{Περιεχόμενα}
     \begin{itemize}
-        \item Απαιτήσεις ηλεκτρονικών ψηφοφοριών \pause
-        \item Ομομορφικά συστήματα \pause
-        \item (Επαληθεύσιμα) Δίκτυα Μίξης \pause
-        \item Ψηφοφορίες με τυφλές υπογραφές \pause
-        \item Ανοιχτά Θέματα \pause
+        \item Απαιτήσεις ηλεκτρονικών ψηφοφοριών
+        \item Ομομορφικά συστήματα 
+        \item (Επαληθεύσιμα) Δίκτυα Μίξης 
+        \item Ψηφοφορίες με τυφλές υπογραφές 
+        \item Ανοιχτά Θέματα 
     \end{itemize}
 \end{frame}
 
@@ -135,15 +134,18 @@ Internet voting is like drunk driving
    Μία γενική κατανεμημένη διαδικασία λήψης απόφασης ... με ηλικία όση οι κοινωνίες ... που αλλάζει ακολουθώντας τις τρέχουσες τεχνολογικές εξελίξεις κάθε εποχής
 \end{block}
 \pause
+\begin{tiny}
 \begin{itemize}
-    \item Σήμερα: εκλογές με υπολογιστές \pause
-    \item Καλή ιδέα, κακή ιδέα ή κάτι αναπόφευκτο; \pause
+    \item Στόχος: εκλογές με υπολογιστές \pause
+    \item Παρατήρηση: Ακόμα και αν δεν το βλέπει ο ψηφοφόρος οι υπολογιστές εμπλέκονται στη διαδικασία (εγγραφή, υπολογισμός και μετάδοση ενδιάμεσων αποτελεσμάτων) \pause
+    \item Στόχος: εκλογές \alert{μόνο με υπολογιστές} - Καλή ιδέα, κακή ιδέα ή κάτι αναπόφευκτο; \pause
     \item Οι ψηφοφορίες περιέχουν εγγενείς δυσκολίες, λόγω πολλών αντικρουομένων απαιτήσεων \pause
     \item Οι υπολογιστές τις επιτείνουν \pause
     \item Όμως, υλοποιήσεις εκλογών με δεκάδες ελαττώματα επέζησαν αιώνες και χρησιμοποιούνται ακόμα \pause
-    \item Δεν έχουν όλες οι εκλογικές διαδικασίες τις ίδις απαιτήσεις ασφάλειας
+    \item Δεν έχουν όλες οι εκλογικές διαδικασίες τις ίδιες απαιτήσεις ασφάλειας
     \item Λύση που εξισορροπεί κινδύνους με απαιτήσεις ασφάλειας
 \end{itemize}
+\end{tiny}
 \end{frame}
 \end{section}
 
@@ -164,7 +166,9 @@ Internet voting is like drunk driving
      \begin{itemize}
          \item Ακεραιότητα κατά τον υπολογισμό του αποτελέσματος
      \end{itemize}
-\end{itemize} \pause
+\end{itemize}
+\end{frame}
+\begin{frame}{Ακεραιότητα (2)} 
 Επιτυγχάνεται μέσω: \textit{επαληθευσιμότητας}
 \begin{itemize} \pause
     \item Ατομική (individual)
@@ -237,6 +241,9 @@ O ψηφοφόρος πρέπει να εκφράσει την πραγματι�
  \item Ψηφοφορία μέσω αντιπροσώπου \pause
  \item Μη έμπιστου (κακόβουλο λογισμικό, προγραμματιστικά λάθη) \pause
  \item Ανοιχτό λογισμικό, μεθοδολογίες πιστοποίησης δεν επαρκούν \pause
+ \begin{itemize}
+     \item Αναγκαίες αλλά όχι ικανές συνθήκες
+ \end{itemize}
 \end{itemize}
 \begin{block}{Software/System Independence (Rivest)}
 \begin{itemize}
@@ -390,7 +397,7 @@ O ψηφοφόρος πρέπει να εκφράσει την πραγματι�
     \begin{itemize}
         \item Το βασικό πρωτόκολλο για ομομορφικά συστήματα \pause 
         \item Υλοποιείται στο σύστημα Helios \pause 
-        \item Κρυπτογράφηση ψήφων με exponential el gamal \pause 
+        \item Κρυπτογράφηση ψήφων με εκθετικό ElGamal \pause 
         \item Αποκρυπτογράφηση αποτελέσματος: Υπολογισμός \pause  \emph{μικρού} διακριτού λογαρίθμου  \pause 
         \item 3 αποδείξεις μηδενικής γνώσης:
         \begin{itemize}
@@ -429,7 +436,7 @@ O ψηφοφόρος πρέπει να εκφράσει την πραγματι�
 \begin{frame}{Cramer, Genaro, Schoenmakers (CGS97):Η απόδειξη μηδενικής γνώσης}
     Έστω ότι ο ψηφοφόρος έχει ψηφίσει yes (απόδειξη για no άσκηση)
     \begin{center}
-        \includegraphics[scale=0.4]{cgs97.PNG}
+        \includegraphics[scale=0.35]{cgs97.PNG}
     \end{center}
     Στην πραγματικότητα: non interactive με Fiat-Shamir heuristic
 \end{frame}
@@ -445,7 +452,7 @@ O ψηφοφόρος πρέπει να εκφράσει την πραγματι�
     \begin{itemize} \pause 
         \item λαμβάνει ένα σύνολο από μηνύματα (ΒΒ)
         \item αλλάζει τη μορφή τους
-        \item εφαρμόζει μια τυχαία μετάθεση (ανακάτεμα)
+        \item εφαρμόζει μια τυχαία μετάθεση
     \end{itemize}
     \item Δύο μορφές λειτουργίας \pause 
     \begin{itemize}
@@ -482,7 +489,7 @@ O ψηφοφόρος πρέπει να εκφράσει την πραγματι�
         \item Το αποτέλεσμα γράφεται στο ΒΒ
         \item Για παράδειγμα ο πρώτος μίκτης θα γράψει:        
         \begin{center}
-         $\ L_1 = \{ \enc_{pk_2}( \cdots \enc_{pk_k}(v_{i},r_{i}) \cdots, r_2) \}_{i=\pi_1(1)}^{\pi_1(n)} $
+         $\ L_1 = \{ \enc_{pk_2}( \cdots \enc_{pk_k}(v_{i},r_{i}) \cdots, r_2) \}_{i=\pi_1^{-1}(1)}^{\pi_1^{-1}(n)} $
         \end{center}        
     \end{itemize} 
  \end{itemize}
@@ -492,7 +499,7 @@ O ψηφοφόρος πρέπει να εκφράσει την πραγματι�
     \item Η διαδικασία επαναλαμβάνεται. \pause 
     \item Τελικά στην έξοδο  του δικτύου μίξης:
         \begin{center}
-        $\ L_k = \{  v_{i} \}_{i=\pi_k \circ \cdots \circ \pi_1(1)}^{\pi_m \circ \cdots \circ \pi_1(n)} $
+        $\ L_k = \{  v_{i} \}_{i=\pi_k^{-1} \circ \cdots \circ \pi_1^{-1}(1)}^{\pi_k^{-1} \circ \cdots \circ \pi_1^{-1}(n)} $
         \end{center} \pause 
     \item Ακολουθεί η καταμέτρηση 
     \item Παρατηρήσεις: \pause 
@@ -532,7 +539,7 @@ O ψηφοφόρος πρέπει να εκφράσει την πραγματι�
         \end{itemize}  
  \end{frame}
  
- \begin{frame}{Reencryption Mixnets (ElGamal)}{Decryption and Reencryption}
+ \begin{frame}{Reencryption  - Decryption Mixnets (ElGamal)}{Decryption and Reencryption}
    \begin{itemize}  
         
         \item Κάθε μίκτης $\{ M_j \}_{j=1}^k$ έχει δημόσιο κλειδί $y_j$ 
@@ -557,15 +564,15 @@ O ψηφοφόρος πρέπει να εκφράσει την πραγματι�
 
 \begin{frame}{Ενεργή επίθεση (Pfitzmann)}
     \begin{itemize}
-\item Στόχος \adv: αποκάλυψη $v_i$ για συμμετέχοντα $P_i$ \pause  
-\item Μέσο: Συνεργασία με κάποιο `κακό' ψηφοφόρο \pause 
+\item \green{Στόχος} \adv: αποκάλυψη $v_i$ για συμμετέχοντα $P_i$ \pause  
+\item \alert{Μέσο}: Συνεργασία με κάποιο `κακό' ψηφοφόρο \pause 
 \item Ανάκτηση αρχικής ψήφου από το ΒΒ  \pause 
 \begin{center}
 $c_{i0} =  (t,u) = (g^R, v_i \cdot (y_1,\cdots,y_k)^R) $ 
 \end{center}
 \item Ο  \adv επιλέγει τυχαίο $x$ και παράγει \pause 
 \begin{center}
-$c^{'}_{i0} = (t^x,u^x)=( g^{R'x}, v_{i}^{x} \cdot (y_j,\cdots,y_k)^{R'x} )$ 
+$c^{'}_{i0} = (t^x,u^x)=( g^{R'}, v_{i}^{x} \cdot (y_j,\cdots,y_k)^{R'} )$ 
 \end{center}
 \item Αντικατάσταση ψήφου του συνεργάτη του. \pause 
 \item Η έξοδος του δικτύου μίξης θα περιέχει  το $v_{i}^{x}$  και $v_{i}$ \pause 
@@ -582,8 +589,8 @@ $c^{'}_{i0} = (t^x,u^x)=( g^{R'x}, v_{i}^{x} \cdot (y_j,\cdots,y_k)^{R'x} )$
   \begin{itemize}
    \item να \textbf{μην} βάλει ετικέτα σε κάποια ψήφο
    \item να \textbf{μην}  αντιγράψει μια ψήφο
-  \end{itemize} \pause 
-  \item Όπως στα ομομορφικά συστήματα \pause 
+   \item ... όπως στα ομομορφικά συστήματα
+  \end{itemize}    \pause  
   \item Μίκτης: Απόδειξη μετάθεσης (proof of shuffle)
   \begin{itemize}
    \item Η μετάθεση είναι έγκυρη
@@ -612,9 +619,13 @@ $c^{'}_{i0} = (t^x,u^x)=( g^{R'x}, v_{i}^{x} \cdot (y_j,\cdots,y_k)^{R'x} )$
         \item Αν $b=1$ έξοδος $({C'}_2, {C'}_1)$
     \end{itemize}
     \vfill \columnbreak
+    \topskip0pt
+    \vspace*{\fill}
     \begin{figure}
         \includegraphics[scale=0.5]{mix2x2.PNG}
     \end{figure}
+    \vspace*{\fill}
+
 \end{multicols}
 
 \framebreak
@@ -673,6 +684,12 @@ $(C'_1 = Reenc(C_1) \wedge C'_2 = Reenc(C_2)) \bigvee (C'_1 = Reenc(C_2) \wedge 
 \item O ψηφοφόρος μπορεί να επαληθεύσει το ψηφοδέλτιο του εισάγοντας σε αυτό ένα τυχαίο αριθμό που μόνο αυτός γνωρίζει. 
 \end{itemize}
 \end{frame} 
+
+\begin{frame}{FOO92}
+    \begin{center}
+        \includegraphics[scale=0.35]{foo.PNG}
+    \end{center}
+\end{frame}
 
 \begin{frame}[allowframebreaks]{Αναλυτική περιγραφή FOO92}
 
@@ -738,7 +755,9 @@ $(C'_1 = Reenc(C_1) \wedge C'_2 = Reenc(C_2)) \bigvee (C'_1 = Reenc(C_2) \wedge 
 \item Aποστολή decommitment values $uid_i,v_i,rc_i$ μέσω ανώνυμου καναλιού
 \item Επαλήθευση δεσμεύσεων από καταμετρητές
 \end{itemize}
-  
+
+\framebreak
+
 \item \textbf{Καταμέτρηση}
 \begin{itemize}
 \item Δημοσίευση 'ανώνυμων' ψηφοδελτίων
@@ -748,11 +767,6 @@ $(C'_1 = Reenc(C_1) \wedge C'_2 = Reenc(C_2)) \bigvee (C'_1 = Reenc(C_2) \wedge 
 
 \end{frame}
 
-\begin{frame}{Το τελικό πρωτόκολλο}
-    \begin{center}
-        \includegraphics[scale=0.35]{foo.PNG}
-    \end{center}
-\end{frame}
 
 \begin{frame}{Συζήτηση FOO}
 \begin{itemize}
@@ -764,7 +778,7 @@ $(C'_1 = Reenc(C_1) \wedge C'_2 = Reenc(C_2)) \bigvee (C'_1 = Reenc(C_2) \wedge 
     \end{itemize} \pause
 \item Verifiability: Δημόσια εκτελέσιμες ενέργειες
 \begin{itemize}
-    \item Individual: Υπαρξη $\{ uid_i, b_i, sb_i^A \}$ και $uid_i,v_i,rc_i$
+    \item Individual: Ύπαρξη $\{ uid_i, b_i, sb_i^A \}$ και $uid_i,v_i,rc_i$
     \item Universal: Οποιοσδήποτε μπορεί να επαναλάβει τις ενέργειες του καταμετρητή 
     \item Eligibility: Βασίζεται στο unforgeability του σχήματος υπογραφών
 \end{itemize}
@@ -792,6 +806,7 @@ $(C'_1 = Reenc(C_1) \wedge C'_2 = Reenc(C_2)) \bigvee (C'_1 = Reenc(C_2) \wedge 
             \item Λόγω verifiability οι ψήφοι είναι εν δυνάμει διαθέσιμοι σε πολλές οντότητες
         \end{itemize} \pause
         \columnbreak
+        \item Τυπικοί ορισμοί για ιδιότητες
         \item Εναλλακτικές μέθοδοι υπολογισμού αποτελέσματος
         \begin{itemize}\setlength\itemsep{0.1em}
             \item σε συνδυασμό με ομομορφικά συστήματα

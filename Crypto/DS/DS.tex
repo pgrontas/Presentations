@@ -1,7 +1,4 @@
-\documentclass[handout]{beamer}
-\usepackage{pgfpages}
-\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
-
+\documentclass{beamer}
 \usepackage{amsmath,amssymb,amsthm,array}
 \usepackage{bm}
 \usepackage{multirow}
@@ -18,13 +15,12 @@
 \newfontfamily{\greekfont}{CMU Serif}
 \newfontfamily{\greekfontsf}{CMU Sans Serif}
 
-\usetheme{Rochester}
-\usecolortheme{beaver}
+\usetheme{metropolis}
  
 \setbeamertemplate{navigation symbols}{}
 \title{Ψηφιακές Υπογραφές}
 \author{Παναγιώτης Γροντάς - Άρης Παγουρτζής}
-\date{28/11/2017}
+\date{27/11/2018}
 \defbeamertemplate*{footline}{shadow theme}
 {%
   \leavevmode%
@@ -41,14 +37,14 @@
   }%
   \vskip0pt%
 }
+\institute{ΕΜΠ - Κρυπτογραφία (2018-2019)}
 
-\institute{ΕΜΠ - Κρυπτογραφία - (2017-2018)}
  \hypersetup{
   pdfauthor={Panagiotis Grontas},
-  pdftitle={Digital Signatures},
+  pdftitle={DS},
   colorlinks=true,
   urlcolor=blue,
-  linkcolor=white
+  pdfborderstyle={/S/U/W 1}	% border style will be underline of width 1pt
 }
 
 \setlength{\columnseprule}{0.4pt}
@@ -92,17 +88,11 @@
 \begin{frame}{Περιεχόμενα}
 \begin{itemize}
 \item Ορισμός - Μοντελοποίηση Ασφάλειας
-\pause
 \item Ψηφιακές Υπογραφές RSA
-\pause
 \item Επιθέσεις - Παραλλαγές
-\pause
 \item Το μοντέλο του τυχαίου μαντείου
-\pause
-\item Ψηφιακές Υπογραφές ElGamal-DSA-ECDSA
-\pause
+\item Ψηφιακές Υπογραφές ElGamal-DSA
 \item Υποδομή Δημοσίου Κλειδιού
-  
 \end{itemize}
 \end{frame}
 
@@ -771,54 +761,6 @@ g^{k} (\bmod{p} \bmod{q})
 \alert{Υπογραφή γρηγορότερη από επαλήθευση}
 \end{frame}
 
-\begin{frame}[allowframebreaks]{Ψηφιακές Υπογραφές - ECDSA}
-
-\textbf{Δημιουργία κλειδιών }
-\begin{itemize}
-\item Δημόσια Διαθέσιμες Παράμετροι: $(p,a,b,\# \mathcal{E},q,G)$
-\item Ιδιωτικό κλειδί: Ένας τυχαίος ακέραιος $x \in \{1, \cdots, q-1 \}$
-\item Δημόσιο κλειδί: Το σημείο $Y=xG \in \mathcal{E}$
-\end{itemize}
-
-\framebreak
-
-\textbf{Υπογραφή}
-\begin{itemize}
-\item Υπολογισμός σύνοψης του μηνύματος $h = \mathcal{H}(M)$ και προσαρμογή της στο $[ 0, \cdots, q-1 ]$
-\item Επιλογή τυχαίου αριθμού $k$ στο σύνολο $\{ 1, \cdots, q-1 \}$
-\item Υπoλογισμός του σημείου $P=kG=(x_P,y_P)$.
-\item Υπολογισμός του $r = x_P \bmod q$
-\item \alert{Αν $r = 0 \pmod{q}$ τότε επιλέγεται καινούριο $k$ και η διαδικασία επαναλαμβάνεται}.
-\item Υπολογισμός του $s = k^{-1} (h + r \cdot x) \bmod{q}$
-\item \alert{Αν $s=0$ τότε επιλέγεται καινούριο $k$ και η διαδικασία επαναλαμβάνεται}.
-\item Η υπογραφή είναι το ζεύγος $(r,s)$
-\end{itemize}
-
-\framebreak
-
-\textbf{Επαλήθευση}
-\begin{itemize}
-\item Υπολογισμός του $u_1 = s^{-1} h \bmod{q}$
-\item Υπολογισμός του $u_2 = s^{-1} r \bmod{q}$
-\item Υπολογισμός του σημείου $P' = u_1 G + u_2 Y$
-\item H υπογραφή είναι έγκυρη αν $r = x_{P' } \pmod{q}$ 
-\end{itemize}
-
-\medskip
-\medskip
-
-\textbf{Ορθότητα}: Υπολογισμός ίδιου σημείου με 2 τρόπους
-
-\begin{itemize}
-\item Υπογραφή $P=kG$
-\item Επαλήθευση $P' = u_1 G + u_2 Y $
-\end{itemize}
-\begin{align*}
-P' = u_1 G + u_2 Y = s^{-1} (h+rx) G = k(h+rx)^{-1}(h+rx)G = kG = P
-\end{align*}
-
-\end{frame}
-
 \section{Υποδομή Δημοσίου Κλειδιού}
 
 \begin{frame}{Πρακτική χρήση ψηφιακών υπογραφών}
@@ -1017,7 +959,7 @@ P' = u_1 G + u_2 Y = s^{-1} (h+rx) G = k(h+rx)^{-1}(h+rx)G = kG = P
 
 \begin{tiny}
 \begin{enumerate}
-\item St. Zachos and Aris Pagourtzis. Στοιχεία Θεωρίας Αριθμών και Εφαρμογές στην Κρυπτογραφία. Πανεπιστημιακές Σημειώσεις
+\item \href{http://hdl.handle.net/11419/5439}{Παγουρτζής, Α., Ζάχος, Ε., ΓΠ, 2015. Υπολογιστική κρυπτογραφία. [ηλεκτρ. βιβλ.] Αθήνα:Σύνδεσμος Ελληνικών Ακαδημαϊκών Βιβλιοθηκών}
 \item Jonathan Katz and Yehuda Lindell. Introduction to Modern Cryptography (Chapman and Hall/Crc Cryptography and Network Security Series). Chapman
 and Hall/CRC, 2007
 \item Paar, Christof, and Jan Pelzl. Understanding cryptography: a textbook for students and practitioners. Springer Science-Business Media, 2009.
