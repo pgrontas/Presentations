@@ -1,0 +1,642 @@
+\documentclass{beamer}
+\usepackage{amsmath,amssymb,amsthm,array}
+\usepackage{bm}
+\usepackage{xltxtra}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{verbatim}
+\usetheme{cambridgeUS}
+\usecolortheme{wolverine}
+\usefonttheme{serif}
+\setmainfont[Mapping=TeX-text]{GFS Neohellenic}
+\setbeamertemplate{navigation symbols}{}
+\title{Coercion Resistance In Voting Systems}
+\author{Panagiotis Grontas}
+\date{29/01/2014}
+\defbeamertemplate*{footline}{shadow theme}
+{%
+  \leavevmode%
+  \hbox{\begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm plus1fil,rightskip=.3cm]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertframenumber\,/\,\inserttotalframenumber\hfill\insertshortauthor (\insertshortinstitute)
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle%
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+\institute{$\mu\Pi\lambda\forall$  - CoReLab Crypto Group}
+
+
+\setlength{\columnseprule}{0.4pt}
+\begin{document}
+
+
+\begin{frame}
+\titlepage
+\end{frame}
+ 
+
+\begin{frame}[allowframebreaks]{Privacy}
+
+\begin{block}{Secret Ballot Elections}
+Privacy < Receipt Freeness < Coercion Resistance
+\end{block}
+
+\begin{block}{Privacy}
+A passive adversary cannot guess a vote from the election result and the secret ballots
+\end{block}
+
+\begin{block}{Receipt Freeness}
+The voter walks away from voting, unable to costruct a receipt of the actual vote. 
+\end{block}
+
+The adversary is still passive, but voters might want to sell their votes
+
+What if the adversary is active?
+\end{frame}
+
+\begin{frame}[allowframebreaks]{A stronger adversary}
+
+An active attacker might force the voter:
+
+\begin{itemize} 
+\item to vote randomly
+\item to nullify one vote (vote in the \textit{opposite} manner)
+\item to abstain from voting
+\item to give away the secret keys (and be impersonated)
+\end{itemize}
+
+
+\begin{block}{Attack against a mixnet}
+\begin{enumerate} 
+\item The adversary retrieves the private key of a voter
+\item ... selects its own preferred vote $v$
+\item ... Encrypts it with the public key of the mixnet $u = E_(pk_{MN}, v)$
+\item ... signs the vote with the private key $s = E(sk_{i}, E_(pk_{MN}, v))$
+\item and appends $(u,s)$ to the $BB$
+\item Signature validates and so the vote is anonymised by the mixnet
+\item The adversary can check that the $u$ is in the mixnet, before the anonymisation process begins
+\end{enumerate}
+or simply ...
+\begin{enumerate}
+\item Skip steps 1-3 
+\item Give readily a $u$ to the voter
+\end{enumerate}
+\end{block}
+
+ 
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Coercion Resistance: Definition and Requirements}
+
+\begin{block}{Coercion Resistance}
+The adversary cannot tell whether the voter submitted to the coercion attempt
+\end{block}
+
+\textbf{Application}: Remote (Internet) Voting
+
+\textbf{Main Idea \cite{juels2005coercion}}
+\begin{itemize}
+\item Each voter casts many ballots
+\item Some are cast with invalid credentials
+\item Some are cast with valid credentials
+\item Only one vote (that corresponds to a valid credential) counts
+\end{itemize}
+
+\framebreak
+
+\textbf{Requirements} 
+\begin{itemize}
+\item Bulletin Board
+\item Existence of anonymous channel for vote casting: Lack of anonymous channel enables forced abstention attack.
+\item Uncertainty about behaviour of some voters (corruption is allowed to some extent) 
+\item Anonymous Voting Credentials
+\item Ability to create indistinguishable fake credentials
+\item One moment of privacy (at least)
+\item Untappable Registration
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The JCJ Protocol - High Level Overview}
+\begin{itemize}
+\item \textbf{Registration} Creation of the voter roll: List of (voter,credential) pairs
+\item \textbf{Voting} Casting of ballots using fake and valid credentials. The system treats them both the same way
+\item \textbf{Tallying}
+\begin{itemize}
+\item Filter out votes with invalid credentials by comparing them against the voter roll
+\item Keep a single vote per voter
+\item Count the votes
+\end{itemize}
+\end{itemize}
+\begin{block}{Cryptographic Primitives}
+\begin{itemize}
+\item Randomized Threshold Public Key Crypto that allow for reencryption
+\item Zero Knowledge Proofs
+\item Universally Verifiable Mixnets
+\item Plaintext Equivalence Tests (PET)
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Plaintext Equivalence Tests}
+
+\begin{block}{PET}
+A cryptographic primitive  to convince a set of participants that two ciphertexts indeed encrypt the same plaintext. 
+
+It operates in a distributed setting, where the decryption key is shared among the participants.
+\end{block}
+
+\begin{block}{An example with El Gamal}
+\begin{itemize}
+\item \textbf{Input:} Two ciphertexts $(G, M), (G', M')$
+\item \textbf{Output:}  True if they encrypt the same plaintext and false otherwise
+\item \textbf{Main idea:} The ciphertext $C_{PET} = (\frac{G}{G'}, \frac{M}{M'})$ will be the encryption of $1$ if the ciphertexts encrypt the same plaintext. Otherwise it will decrypt to a random integer.
+\item Implementation: Each player $i$
+\begin{itemize}
+\item Selects a random integer $z_i$ and commits to it using the Pedersen commitment scheme.
+\item Blinds $C_{PET}$ using the random value $z_i$ thus producing $(G_i, M_i) = ((\frac{G}{G'})^{z_i}, (\frac{M}{M'})^{z_i})$
+\item Everybody proves that the $(G_i, M_i)$ are indeed blinded with the random values.
+\item The players calculate $(\prod_i G_i, \prod_i M_i)$ and decrypt by combining their shares of the key.
+\item If the decryption yields $1$ the test return \textit{true}, otherwise the test return \textit{false}.
+\end{itemize}
+\end{itemize}
+\end{block}
+ 
+\end{frame}
+
+\begin{frame}[allowframebreaks,fragile]{The JCJ Protocol - Detailed Description}
+\begin{enumerate}
+
+\item \textbf{Setup Phase:}
+\begin{itemize}
+\item $(pk_R,sk_R)$ key pairs for registration authorities $R$
+\item $(pk_T,sk_T)$ key pairs for tallying authorities $T$
+\item Minority Corruption for  $R$ and $T$ is allowed
+\end{itemize} 
+
+\item \textbf{Registration Phase:}
+\begin{itemize}
+\item Validate voter identity 
+\item Generate the valid voter credentials $(S_i = E_{pk_T}(\sigma_i),\sigma_i)$ where $\sigma_i$ is random 
+\item $S_i$ is placed in the $BB$ and $\sigma_i$ is transmitted through an untappable channel
+\item The voter roll: list of the encrypted credentials $VR=\{S_i\}_{i=1}^N$
+\item This phase must be \textit{corruption-free}:
+\begin{itemize}
+\item The credential is generated in a distributed fashion
+\item The voter must delete all the transcripts from the interaction with the registration authority \textit{or}
+\item The coercer cannot corrupt any majority of registration authorities \textit{or}
+\item The voters can distinguish the corrupted players.
+\end{itemize}
+\end{itemize}
+
+\framebreak
+
+\item \textbf{Voting Phase:}  
+\begin{itemize}
+	\item Ballots are cast in the bulletin board as usual.
+	\item Ballot = (Encryption of candidate choice, Encryption of the credential) - a modified ElGamal Scheme is used
+	\item $B = (E_{pk_T}(v_i),E_{pk_T}(\sigma_i)) = ((g_1^{r_1},g_2^{r_1},v_i h^{r_1}),(g_1^{r_2},g_2^{r_2},\sigma_i h^{r_2}))$ where $r_1,r_2$ are random values
+	\item Proofs
+	\begin{itemize}
+		\item knowledge of vote and credential
+		\item vote validity, candidate index is valid
+		\item proof that the same randomness is used
+	\end{itemize}
+	\item Proofs are essential for coercion resistance since:
+	\begin{itemize}
+		\item Since the voter roll is public, the attacker might spoof a credential by reencrypting a voter roll entry.  
+		\item An invalid vote might indicate a forced abstention or a randomisation attack.
+	\end{itemize}
+	\item The voting phase takes place using an anonymous channel.
+	\item \textbf{Reasons:} Thwart the forced abstention attack \\
+						    make the coercer unaware of the actual vote position in the bulletin board.
+\end{itemize}
+
+\framebreak
+
+\item \textbf{Tallying Phase:} 
+\begin{itemize}
+\item Before counting begins, the proofs of correctness are extracted and validated
+\item Ballots with invalid proofs are discarded
+\item Multiple votes with the same credential are eliminated:
+
+\begin{itemize}
+\item Two lists are created, from the rest of the valid ballots $L$. 
+\item $L_1$ contains the encrypted votes 
+\item $L_2$ contains the encrypted credentials.
+\item Duplicates are removed from $L_2$ using PET (each encryption in $L_2$ is compared to all others in $L_2$)
+\item The removal is cascaded to the list with the encrypted votes using a \textit{first vote counts} or \textit{last vote counts} rule.
+\item The lists are merged. The result $L'$ contains distinct items and is forwarded to a mixnet. 
+\end{itemize}
+
+\framebreak 
+
+\item Votes with fake credentials are eliminated:
+\begin{itemize}
+\item The voter roll is forwarded to the mixnet as well, to be mixed and renecrypted
+\item The mixed credential list is compared to the mixed voter roll leading to the discovery of the fake credentials using PET.
+\item Both the fake credentials and the corresponding votes are removed
+\end{itemize}
+\item The resulting list of encrypted votes is threshold-decrypted and the votes are counted. 
+\end{itemize}
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Proof of security}
+
+\begin{block}{Coercion game}
+\begin{itemize}
+\item The target voter flips a coin $b$. 
+\item If $b=0$ then the voter evades coercion by using a fake credential. 
+\item If $b=1$ the voter submits to coercion. 
+\item In both cases the adversary dictates the selection
+\item Coercion resistance is achieved when the adversary has a negligible advantage on guessing b 
+\end{itemize}
+\end{block}
+
+\begin{block}{Proof Strategy}
+\begin{itemize}
+\item Target: $\mathcal{A}$ has negligible advantage compared to $\mathcal{A}'$ that is passive, and interacts with an ideal system that (disregards corrupted voters and invalid ballots)
+\item Strategy: Replace election scheme with simulated scheme. If $\mathcal{A}$ cannot distinguish the two, then $\mathcal{A}$ does not learn anything from   the scheme
+\item $\mathcal{A}$ is equivalent to $\mathcal{A}'$
+\end{itemize}
+
+\end{block}
+
+\framebreak
+ 
+\textbf{The real experiment $c-resist$} 
+\begin{itemize}
+\item The adversary $\mathcal{A}$ selects the targets for corruption.
+\item Voters register
+\item $\mathcal{A}$ sets coercive target and choice
+\item The voter flips a coin $b$
+\item If $b=0$ then the voter makes a voting choice and returns a fake credential to the adversary
+\item If $b=1$ then the voter votes, and returns the real credential to the adversary
+\item $\mathcal{A}$ posts to the bulletin board the votes of the corrupted voters
+\item The tallying authorities count the votes
+\item $\mathcal{A}$ gets the result and tries to guess if the coercion attempt succeeded, by setting $b'$
+\item If $b'=b$ then output $1$ else output $0$
+\end{itemize}
+
+\framebreak 
+
+\textbf{The ideal experiment $c-resist-ideal$:Only information is the tally result}
+\begin{itemize}
+\item The adversary $\mathcal{A'}$ selects the targets for corruption.
+\item Voters register 
+\item $\mathcal{A}$ sets coercive target and choice
+\item The voter flips a coin $b$
+\item If $b=0$ then the voter makes a voting choice
+\item The voter return the real credential to the coercer
+\item $\mathcal{A}'$ posts to the bulletin board the votes of the corrupted voters
+
+\framebreak 
+
+\item The tallying authorities count the votes in an ideal way, so that $\mathcal{A}'$ does not learn anything from the tallying
+\begin{itemize}
+\item Ballots by honest voters are counted normally
+\item Double votes are not counted
+\item Corrupted players' votes are not counted
+\item If $b=0$ (evade corruption) the vote is not counted
+\item If $b=1$ (submit to corruption) the vote is counted
+\end{itemize}
+\item $\mathcal{A}'$ gets the result and tries to guess if the coercion attempt succeeded, by setting $b'$
+\item If $b'=b$ then output $1$ else output $0$
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Proof of coercion resistance}
+\begin{block}{Theorem}
+If the Decisional Diffie-Hellman (DDH) Assumption holds, then the protocol provides coercion resistance
+\end{block}
+\begin{proof}
+\begin{itemize}
+\item Construct a simulator $\mathcal{S}$
+\item  $\mathcal{S}$ takes the honest votes and simulates $c-resist$  
+\item Instead of the votes $\mathcal{S}$ provides random ciphertexts
+\item Due to the DDH the adversary cannot distinguish the simulated ciphertexts with the real ciphertexts that would come up in an election
+\end{itemize}
+\end{proof}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Discussion}
+
+\begin{block}{Drawbacks}
+
+\begin{itemize}
+\item $v$ is the number of \textbf{votes} and $N$ is the number of voters
+\item $ v >> N $ because of the fake and multiple votes
+\item \textit{Complexity}: $O(v^2)+O(vN)$ for duplicate and fake removal
+\item \textit{Application}: Fake and Real Credential Management
+\end{itemize}
+
+\end{block}
+
+\begin{block}{Cut down performance to linear time}
+
+\begin{itemize}
+\item A standard solution: Replace pairwise PET comparisons with hashtables
+\item Add structure to the credentials
+\end{itemize}
+
+\end{block}
+
+\begin{block}{Practical Aspects: Representation and usability of credentials}
+
+\begin{itemize}
+
+\item Use only two credentials \cite{Schweisgut06}
+
+\begin{itemize}
+\item The real one and the fake one, indistinguishable in form and content
+\item The property that makes a credential valid is that it is included in the voter roll.
+\item The two credentials are included in an observer: a tamper resistant device like a smartcard. 
+\end{itemize}
+
+\item Panic Passwords
+
+\end{itemize}
+
+\end{block}
+
+\begin{block}{Basic Attacks \cite{WDSmith05}}
+
+\textbf{The 1009 Attack}
+
+\begin{itemize}
+\item The coercer forces the voter to vote a particular number of times (eg. 1009) using a particular ciphertext
+\item Check if 1008 votes were removed from L, during deduplication
+\item Check that the remaining ciphertext was present in the final list
+\end{itemize}
+
+\textbf{The timestamping attack}
+
+\begin{itemize}
+\item The timestamp of the ballot can serve as a ballot identifier, - receipt
+\item It must be removed from all outputs
+\end{itemize}
+
+\textbf{Board Flooding}
+Take advantage of large processing time and create a DoS attack by injecting random votes with invalid credentials
+
+\end{block}
+
+\end{frame}
+
+\begin{frame}[allowframebreak]{Hashtables instead of PET}
+
+\begin{block}{An obstacle}
+A hashtable cannot be used to identify identical credentials because they are subject to randomised encryption
+
+The randomisation of the encryption must be removed  before the hashtable is employed
+
+The encrypted credentials must be blinded
+\end{block}
+
+Process
+
+\begin{itemize}
+\item $(u,v) = (g^r, \sigma h^r)$ is an El Gamal ciphertext of credential $\sigma$
+\item $s$ a shared private key, $h=g^s$ the public key, $r$ the randomness employed
+\begin{itemize}
+\item The authorities select a second private key $z$ which is shared as well.
+\item They blind the ciphertext by computing $(u^{sz}, v^z) = (g^{rsz}, \sigma^z g^{rsz})$
+\item Subsequently they divide the components which leaves only the plaintext credential blinded $\sigma^z$
+\item The hashing approach can now be used to half \cite{WDSmith05} or to the whole \cite{Weber07} of $\sigma^z$ 
+\end{itemize} 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Attacks}
+
+A variant of the tagging attack \citep{AraujoFT07}
+
+\begin{itemize}
+\item The coercer should be able to retrieve the encryption of the voter's credential
+\item Utilise the malleability of the encryption scheme and construct a ciphertext that is somehow related to the original
+\item The coercer can compute the product of the encrypted credential and the encryption of a random value known to him
+\item Discover if the particular vote passed the credential validity test by checking if it was removed from the final output  
+\end{itemize}
+
+Does not apply to duplicate removal phase!
+
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Civitas: An implementation}
+To generate a credential, a set of registration tellers cooperate:
+\begin{itemize}
+	\item Each teller generates a share $s_j$ of the credential, which is encrypted using standard ElGamal yielding $S_j$, which is placed in the bulletin board.
+	\item The public part of the credential is calculated as $S=\prod_j S_j$
+	\item Due to the multiplicative homomorphism of El Gamal $S = Enc(\prod_j s_j)$
+\end{itemize}
+
+The untappable channel is implemented using the concept of designated verifier proofs  through an untappable channel.
+\begin{itemize}
+	\item Each teller gives its credential share to the voter and a mechanism to validate it.
+	\item More specifically the teller presents $(s_j,r,S^{'}_{j}=Enc(s_j,r),D)$ where D is a DVP that $S^{'}_{j}$ is a reencryption of $S_i$
+	\item The voter is convinced of the share validity, but cannot transfer the proof to the coercer
+	\item The full private credential is constructed by multiplying received shares.
+\end{itemize}
+
+In order to fake the credential, a coerced voter can simply select a fake credential share $\hat{s_j}$, which is assumed belongs to a teller not controlled by the adversarys. Its existence is an assumption of both $\cite{civitas08}$ and $\cite{juels2005coercion}$.
+
+To solve the scalability problem, Civitas employs parallelism. 
+\begin{itemize}
+
+\item The voters are partitioned in \textit{virtual precincts}, called blocks. 
+\item Vote authorisation and tallying happens indepently in each block, and the results are aggregated.
+\item As a result the complexity of the scheme is $O(BM^2) + O(BKM)$ where $M$ is the maximum number of votes per block, $B$ is the number of blocks and $K$ is the minimum number of voters per block.
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Efficiency due to extra information \cite{SpycherKHS11}}
+ 
+\begin{itemize}
+\item Registration Phase: The voter retrieves through the untappable channel the index where his credential is located in the voter roll
+\item He encrypts and includes the index in the cast vote.
+\item Duplicate removal through hashtables
+\item During the tallying phase the index will be decrypted and the credential exactly pinpointed in the voter roll
+\item A single PET can identify the fake credential
+\end{itemize} 
+
+\begin{block}{An observation}
+\begin{itemize}
+\item Invalid vote: invalid credential or invalid index
+\item Invalid index: 2 cases
+\begin{itemize}
+\item Index in range but not the one in the voter roll: will be revealed in the end
+\item Index out of range: will be revealed in the beginning
+\end{itemize}
+
+Fake Indices should be uniform
+
+Fake Indices Provided by the registration authorities
+\end{itemize} 
+\end{block}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Anonymity Sets - Selections \cite{CH11}}
+\begin{block}{Anonymity Sets}
+A set of \textit{identical items} one of which is relevant the rest being decoys. 
+\end{block}
+
+\textbf{Application}: Include in the ballot the real and $\beta-1$ other credentials
+
+\begin{itemize}
+\item Encrypt credential $\sigma$ using exponential El Gamal
+\item Commit to $g^\sigma$ and rerandomise public counterpart
+\item Pick $\beta-1$ public parts and embed them in the ballot
+\item Use a WID proof to prove that the credential is a rerandomisation of one of the credentials, without revealing which
+\item Duplicates are instantly revealed by $g^\sigma$
+\item Real votes are deduced by a single PET
+\end{itemize}
+
+A variation \cite{SpycherKHS11} anonymity set is selected by the voter and the authorities create the ballots
+
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Adding structure to the credentials \cite{AraujoFT07}}
+\begin{itemize}
+\item Credentials: A quadruple $(r,a,b=a^y,c=a^{x+xry})$ where:
+\begin{itemize}
+\item $x,y$ are two secret keys 
+\item  $a$ is a random number $a \neq 1$
+\item  $r$ is a random number from a group with hard DDH
+\end{itemize}
+\item  A adversary cannot tell whether a quadruple is a valid one or it merely consists of randomly selected components
+\item  An attacker that comes across quadruples $(r_i,a_i,b_i,c_i)$ cannot use them to create a distinct valid one (the LRSW assumption - Lysyanskaya,
+Rivest, Sahai, and Wolf (LRSW))
+\item  The $r$ part should be kept secret, while $(a,b,c)$ could be made public
+\end{itemize}
+
+\framebreak
+
+\textbf{Operation}
+ 
+\begin{itemize}
+\item \textbf{Setup}
+	\begin{itemize}
+		\item Two generators $g,o$ of a group of prime order where the DH assumption holds. 
+		\item $g$ will be used for the standard ElGamal operations 
+		\item $o$ will be used for duplicate removal in linear time.
+		\item Registration Authorities Keys $(x, R_x) (y, R_y) $ 
+		\item Tallying Authorities Keys $\hat{T},T$ 
+	\end{itemize}
+\item \textbf{Registration}
+	\begin{itemize}
+		\item Validate identity
+		\item Credential and DV proof transmission through untappable channel
+		\item \textbf{Note:}  If the credential $(r,a,b,c)$ is valid, then every credential of the form $(r,a^l,b^l,c^l)$ is valid. 
+		\item \textbf{Application: } Many Elections with a single credential
+	\end{itemize}
+	
+\item \textbf{Voting} 
+	\begin{itemize}
+		\item Ballot: $(E_T[vc],E_T[a^r],E_T[b^r],E_T[c], a, o^r)$
+		\item Proofs: 
+		\begin{itemize}
+			\item $vc$ is a valid candidate selection
+			\item proofs of knowledge of each encrypted plaintext
+			\item proof that the blinding factor $r$ is the same in $E_T[a^r]$ and $o^r$
+		\end{itemize} 
+	\end{itemize} 
+
+\framebreak
+
+\item \textbf{Tallying}  
+	\begin{itemize}
+		\item \textbf{Proof Validity Check} The proofs of the ballots are checked and the ones which are not verified are eliminated
+		\item \textbf{Duplicate Removal} The value $o^r$ is passed through a hashtable and based on it the duplicate ballots are removed. 
+		\item Afterwards for all unique ballots the proofs as well as the value $o^r$ are removed. The plaintext $a$ is encrypted using the $T$. 
+		\item \textbf{Anonymisation} The unique ballots are anonymised via a verifiable reencryption mixnet. The output of the mixnet is a quintuple 
+		$(t,u,v,w,z)=(Reenc(vc),Reenc(a),Reenc(a^r),Reenc(b^r),Reenc(c))$ 
+		\item \textbf{Credential Validity Check} The identification of the invalid ballots is done with the cooperation of the registration authorities which is an active participant in the whole process. Instead of supplying the voter roll as in \cite{juels2005coercion}, they supply their private keys $(x,y)$ in order to:
+		\begin{itemize}
+		\item Compute $v^y = Reenc(a^r)^{y}=Reenc(a^{ry})$
+		\item Check if $PET(v^y,w) = 1$. 
+		\item If everything is OK the check should be successful since $v^y = Reenc(a^{ry})$ and $w = Reenc(b^r) = Reenc(a^{y^r})$, which means that both are encryptions of $a^{ry}$
+		\item Compute a new shared key $k$  to blind  $(\frac{z}{(uw)^x})^k = (\frac{Reenc(c)}{(Reenc(a)^x Reenc(b^r)^x)})^k$. 
+		\item If the credential is valid then the result of the computation should decrypt to $1$. 
+		\item \textbf{Why blinding} If the credential is invalid then $\frac{Reenc(c)}{(Reenc(a)^x Reenc(b^r)^x)}$ might yield information about the relationship between $a,b,c$ in order to construct a fake but valid credential
+		\end{itemize}		  
+		\item \textbf{Result Computation} The valid ballots are decrypted and aggregated.
+	\end{itemize}
+\end{itemize}
+
+\textbf{Remarks}
+
+\begin{itemize}
+\item Linear time,deduplication with hashtables on $o^r$
+\item Problem with revocation: split the credentials to public $(a,b,c)$ and private $r$ 
+\item Authorities can generate rogue valid credentials
+\end{itemize}
+ 
+\end{frame}
+
+\begin{frame}[allowframebreaks]{A practical aspect}
+\begin{block}{Question}
+How does the voter actually create the fake credentials when under coercion?
+Solution: \textit{panic passwords} \cite{CPanic} as used in the \textit{Selections} scheme (\cite{CH11})
+\end{block}
+
+\begin{itemize}
+
+\item During registration the voter selects a password to be used during vote casting. 
+\item In reality the voter partitions the space of possible passwords into three categories:
+\begin{itemize}
+\item The actual password to authenticate the voter and submit the real credential
+\item The panic passwords which indicate that the user is under coercion and generate fake credentials. The interaction however is indistinguishable from the one that takes place with the actual password.
+\item The inadmissible passwords that indicate authentication failure and do not allow vote casting
+\end{itemize}
+\item Panic passwords should be a sparse subset of inadmissible passwords 
+\item The actual password is a pre selected panic password. 
+\item An example implementation \textit{5-Dictionary}. 
+\begin{itemize}
+\item The password space consists of any combination of five words. 
+\item The valid passwords are any combination of five words from an agreed upon dictionary.
+\item A particular combination is selected as the actual password during registration. 
+\item Any other combination from the dictionary is a panic password. 
+\item Any other five word combination from the password space is invalid.
+\end{itemize}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Board Flooding}
+\begin{block}{A DoS attack}
+Inject fake votes to cause a quadratic effect in the vote authorisation phase 
+\end{block}
+A solution: Dummy credentials and a \textit{smarter} bulletin board
+\begin{itemize}
+\item Extra anonymous tokens are given during registration
+\item They aim to put an upper bound on the number of ballots
+\item The bulletin board immediately rejects duplicate ballots and fake ballots, using the linear hashtable based approach (The tagging attack does not apply since the attacker cannot tell do not reach the tallying phase)
+\item A vote is counted only if it does not correspond to the dummy credential
+\item The number $d$ of dummy credentials per voter is crucial
+\begin{itemize}
+\item If it is fixed then the scheme is not coercion resistant (the attacker simply forces the voter to cast $d+1$ ballots
+\item A variable number $d_i$ still leaves some voters exposed
+\begin{itemize}
+\item The coercer might force the voter to vote $min \{d_i\} + 1$ times or $max\{d_i\} + 1$ times
+\end{itemize}
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{References}
+\begin{small}
+\nocite{*}
+\bibliographystyle{alpha}
+\bibliography{coercion}
+\end{small}
+\end{frame}
+
+ 
+\end{document}

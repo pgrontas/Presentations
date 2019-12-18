@@ -1,0 +1,319 @@
+\documentclass{beamer}
+\usepackage{amsmath,amssymb,amsthm,array}
+\usepackage{bm}
+\usepackage{xltxtra}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usetheme{CambridgeUS}
+\usecolortheme{wolverine}
+\usefonttheme{serif}
+\setmainfont[Mapping=TeX-text]{GFS Neohellenic}
+\setbeamertemplate{navigation symbols}{}
+\title{Receipt Freeness In Voting Systems}
+\author{Panagiotis Grontas}
+\date{06/12/2013}
+\defbeamertemplate*{footline}{shadow theme}
+{%
+  \leavevmode%
+  \hbox{\begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm plus1fil,rightskip=.3cm]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertframenumber\,/\,\inserttotalframenumber\hfill\insertshortauthor (\insertshortinstitute)
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle%
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+\institute{$\mu\Pi\lambda\forall$  - CoReLab Crypto Group}
+
+
+\setlength{\columnseprule}{0.4pt}
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Context}
+
+\begin{itemize}
+\item \textbf{Voting Privacy}: Leak no information about voting, to enable secret ballot elections
+\item Privacy: During and after voting
+\item\textbf{Voting Verifiability}: Leak enough information to enable everybody to check the result
+\item \textbf{Facts}:
+\begin{itemize}
+	\item Voters might want to reveal their votes after the elections
+	\item Verification information might aid them to
+\end{itemize}
+\item Privacy should be enforced
+\item Privacy and verifiability are contradicting
+\item Verifiability without usable evidence
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Receipt Freeness \cite{BT94}}
+\begin{block}{Receipt-Freeness}
+The voter cannot prove how he voted after the fact
+
+The protocol must maintain verifiability
+\end{block}
+
+\begin{itemize}
+\item In traditional voting schemes the voter is isolated during the voting process
+\item He brings nothing outside of the voting booth
+\item An electronic analogue is needed
+\begin{block}{Definition}
+A voting booth is a component that provides information theoretically secure communication between two entities. 
+\end{block}
+\item Voting is done in \textit{booth mode}
+\item The voter can forge all messages he receives.
+\item It is not enough
+\end{itemize}
+
+\begin{block}{E-Voting Schemes always yield a receipt}
+\begin{itemize}
+\item Public Key Encryption is randomised to be secure
+\item The randomisation can server as a receipt
+\item A coercer might use it to check if the voter cooperated or not
+\item Simply encrypt the selection using the randomness and check the BB for the ciphertext
+\end{itemize}
+\end{block}
+
+\framebreak
+
+\begin{block}{Main idea}
+\begin{itemize}
+\item Adaptation of the first verifiable voting scheme \cite{CF85},\cite{CY86}
+\item The voter does not construct the ballot
+\item Instead, it is constructed by the authorities
+\item The voter simply selects his choice, without providing any input
+\item Every action is proved
+\end{itemize}
+\end{block}
+
+\framebreak
+
+\begin{enumerate}
+\item \textbf{The authority} generates $\eta+1$ ballots as randomised encryptions of a $yes-vote$ and a $no-vote$ in random order.
+\item In \textit{booth mode}, the voter receives the decryption of a specific component for each of the $\eta+1$ ballots.
+\item The authority proves publicly that the ballots are of the correct form as in \cite{CF85}.
+\begin{itemize}
+\item The beacon generates $\eta$ random bits $c_i$
+\item $c_i=0$: the current ballot is decrypted with a proof of correctness
+\item $c_i=1$: Prove that the master ballot contains valid encryptions by connecting the current ballot with the master ballot
+\end{itemize}
+\item The voter \textit{publicly indicates} the preferred index in the first ballot, to be his vote.
+\end{enumerate}
+
+\framebreak
+
+\begin{itemize}
+\item Each authority $A_j$ selects a blinding factor $f_j$ and supplies its encryption $e_j$ to each voter
+\item Inside the voting booth, the voter is given $f_j$ and proof that its encryption is $e_j$ (using the beacon)
+\item The voter selects the vote $v_i$ and a polynomial $P_i$ in order to share the votes to the authorities. $P_i(0)=v_i$
+\item Each share is blinded by calculating $y_j = P(j) - f_j$
+\item Each voter releases the pair $(y_j,e_j)$ for all authorities. This tuple is the actual vote
+\item The authorities add the blinded shares and multiply the encryptions for all the voters. Since the encryption is homomorphic the product of the $e_j$ can be decrypted and used to unblind the sum of the blinded shares
+\item Each authority now has a point for the combined voter polynomial $Q = \sum_{i=1}^N P_i$ where $Q(0) = \sum_{i=1}^N P_i(0)$ yields the election result 
+\item At least $t$ authorities can reconstruct the polynomial and retrieve the tally
+\end{itemize}
+
+\framebreak
+
+\cite{BT94} Receipt Freeness was rebutted in \cite{HS00}
+\begin{itemize}
+\item Turn the validity argument around
+\item Commit to an ordering of the test ballots $(v_0,v_1,...,v_\eta)$
+\item The receipt is the commitment
+\item Each beacon bit validates the receipt
+\item Probability of receipt validity = Probability of vote validity = $1-2^{-\eta}$
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Adding Receipt Freeness to Mixnets \cite{SK95}}
+
+\begin{definition}{Chameleon Bit Commitments (Chaum, Brassard and Crepeau)}
+A bit commitment that can open in both 0 and 1 using a trapdoor
+\end{definition}
+
+\begin{definition}
+An untappable channel is an addon to the voter that provides information theoretically secure one way communication to another party. 
+\end{definition}
+
+\begin{block}{Requirement}
+The channels used by the decommitments are \textit{physically untappable}.
+\end{block}
+
+\begin{itemize}
+\item \cite{SK95}: the first verifiable mixnet
+\item ...providing receipt freeness
+\item The encrypted votes are not be prepared by the voter, but by the system
+\item The system must convince the voter of the validity of the encryption in a way that is not transferable to a coercer.
+ 
+
+\item \cite{SK95} utilises the mixnet \textit{backwards}
+\begin{itemize}
+\item The last mix server prepares encryption of  a pair of \textit{yes/no} votes in random internal order for each voter.
+\item He shuffles and reneencrypts the lists and proves the correctness of the action using the cut and choose protocol.
+\item He then sends the list to the next (previous) mix server, which is actually the previous one
+\item Each mix server rearranges randomly the internal order of the votes and proceeds to his normal reencryption and permutation
+\end{itemize}
+
+\framebreak
+
+\item The voter must pinpoint the encryption destined for him in the shuffled list and choose internally his preferred option, either yes or no.
+\item He must know the internal reorderings, the shuffles and the reencryptions. 
+\item Each mix server must commit to these actions and send the commitments to the voter
+\item The opening of the commitments will provide the necessary information to the voter.
+\item It must be done however in a manner that does not provide a receipt - \textit{chameleon blobs}
+\item In order to vote, the voter selects the correct component and uses the mixnet in the normal forward fashion. 
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Designated Verifier Proofs \cite{JSI96}}
+
+\begin{itemize}
+\item ZK proofs offer public verifiability
+\item ... The \textit{coercer} can verify too ...
+\item The proof can serve as a receipt
+\item Ability to forge a proof is needed
+\item Proofs verifiable only by a designated verifier
+\end{itemize}
+
+\begin{block}{Idea}
+ 
+\begin{itemize}
+\item The prover wants to prove statement $\Phi$ to the verifier
+\item Construct \textit{verifier-specific version} $\Phi \bigvee DV$ where \textit{DV=I am the designated verifier}
+\item $DV$ corresponds to knowledge or possession of some secret trapdoor information on a chameleon commitment scheme
+\item Only the designated verifier has access to the trapdoor information (a secret key).
+\item If the proof is valid then $\Phi$ is valid
+\item Transfer the proof: $DV$ is true so the disjunction is always true
+\end{itemize}
+\end{block}
+
+\framebreak
+
+\begin{block}{Implementation using Pedersen commitment}
+\begin{itemize}
+\item Let $x_V, y_V=g^{x_v}$ be a secret public key pair.
+\item The prover commits to $w$ by computing $g^w y_V^{r}$
+\item To open the commitment the prover sends $(w,r)$ 
+\item The verifier can validate the commitment since he knows $x_V$
+\item The verifier can present to an adversary $(w',r')$ such that the commitment is valid
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+
+\begin{frame}[allowframebreaks]{Adding Receipt Freeness to Homomorphic Schemes \cite{HS00}}
+
+\begin{block}{Idea}
+\begin{itemize}
+\item Combine \cite{SK95} with \cite{CGS97}
+\item Free the voter from the need to encrypt his choice
+\item The voting authorities prepare encryptions of the possible votes and the voter simply picks the choice of interest
+\item Maintain ballot secrecy using a re-encryption mixnet.
+\item Notify voter of all the permutations and reenecryption factors used, to enable him to pinpoint   the vote of choice
+\item Use of designated verifier proofs
+\item Requirement: \textit{untappable one way communication channels} from the authorities to the voters
+\end{itemize}
+\end{block}
+
+\framebreak 
+
+\begin{itemize} 
+\item \textbf{Vote Generation}
+\begin{enumerate}
+\item Each valid choice $v_i \in \{ v_1, v_2, \cdots v_C \}$ is deterministically encrypted by the public key encryption algorithm (using predetermined randomness) producing the list of the encryptions of the valid choices $L_0=\{e_1^0, \cdots, e_C^0\}$. Everybody can validate these encryptions by encrypting each choice with the randomness agreed.
+\item Each authority $A_k$ reencrypts and permutes $L_{k-1}$ thus producing $L_k$
+\item Each authority \textit{publicly} proves that each vote in $L_{k-1}$ has a reencryption in $L_k$.
+\item Each authority sends using the untappable channel the permutation $\pi_k$ it applied and \textit{privately} proves that it is valid.
+\end{enumerate}
+\item \textbf{Vote Casting} Using the permutation information received from each authority the voter tracks down the output item that encrypts his choice.
+The vote casted is the index of the desired item.
+\item \textbf{Vote Tallying} Since the scheme applies to homomorphic cryptosystems, the authorities compute the homomorphic function and decrypt the tally, while proving its correctness. 
+\end{itemize}
+
+\framebreak
+
+\begin{block}{WID Proof of reencryption \textit{(for verifiability)}} 
+\textbf{Input} An encrypted vote $(x,y)$ and a list of encrypted votes $L=\{(x_i,y_i)\}_{i=1}^L$
+
+\textbf{Output} Proof that there exists a reencryption of $(x,y)$ in L, without revealing the position
+
+\textbf{Private Input for prover} $t$ the index of the reencryption $(x_t,y_t) = (g^{\xi}x,h^{\xi}y)$ 
+\end{block}
+
+\begin{itemize}
+\item The prover randomly selects $\{ d_i \}_{i=1}^L, \{ r_i \}_{i=1}^L$ 
+\item He calculates $\{ a_i = (\frac{x_i}{x})^{d_i} g^{r_i} \}_{i=1}^C$ and $\{ b_i = (\frac{y_i}{y})^{d_i} h^{r_i} \}_{i=1}^C$. 
+\item For the actual reencrypted value the prover calculates $a_t = g^{\xi d_t + r_t}$ and $b_t = h^{\xi d_t + r_t}$. 
+\item The prover offers the calculated values to the  verifier.
+\item The verifier randomly selects a challenge $c$ and returns it to the prover.
+\item The prover recalculates $d_t$ as $d_t' = c - \sum_{i=1, i \neq t}^C d_i$ and finds $r_t'$ such that $\xi d_t + r_t = \xi d_t' + r_t'$. 
+\item Then he updates the values of $d_t,r_t$ to $d_t',r_t'$. 
+\item Finally he submits the values $\{ d_i \}_{i=1}^C, \{ r_i \}_{i=1}^C$ to the verifier.
+\item The verifier validates that:
+\begin{itemize}
+\item $c=\sum_i d_i$
+\item $\{ a_i = \frac{x_i}{x}^{d_i} g^{r_i} \}_{i=1}^C$
+\item $\{ b_i = \frac{y_i}{y}^{d_i} h^{r_i} \}_{i=1}^C$.
+\end{itemize}
+\end{itemize}
+ 
+\framebreak
+
+\textbf{DV Proof of reencryption}
+\begin{block}{Ρeceipt Freeness}
+Prove that $(x',y')$ is a reencryption of $(x,y)$ with witness $\xi$ 
+
+Equivalently $(x',y')=(g^\xi x,h^\xi y)$
+
+The verifier has a (public,secret) key pair $(h_{ver},z_{ver})$. 
+
+Use the private key in order to forge the proof for the coercer, while maintaining its validity. 
+\end{block}
+
+
+
+\begin{itemize}
+\item The prover randomly selects $d,w,r$ and sends to the verifier the values 
+\begin{itemize}
+\item 	$a=g^d$
+\item  	$b=h^d$
+\item 	$s=g^w h_{ver}^r=g^{w+z_{ver}r}$
+\end{itemize}  
+\item The verifier selects a random challenge $c$ and sends it to the prover.
+\item The prover calculates $u=d+\xi(c+w)$ and sends $u,w,r$ to the verifier.
+\item The verifier validates that: 
+\begin{itemize}
+\item $s=g^w h_{ver}^r$
+\item $g^u = \frac{x'}{x}^{c+w} a$
+\item $h^u = \frac{y'}{y}^{c+w} b$
+\end{itemize}
+\end{itemize}
+
+\begin{block}{How to forge the proof}
+\begin{itemize}
+\item The verifier knows the secret key 
+\item Find $w',r'$ such that $w+z_{ver}r=w'+z_{ver}r'$ 
+\item Forge the proof for any $(x'',y'')$, by randomly selecting the offers $a,b$ and calculating $w'=a-c$ and $r'=\frac{b-w}{z_{ver}}$
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{References}
+\begin{small}
+\nocite{*}
+\bibliographystyle{alpha}
+\bibliography{rf}
+\end{small}
+\end{frame}
+ 
+\end{document}

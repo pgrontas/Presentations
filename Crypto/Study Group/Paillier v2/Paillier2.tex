@@ -1,0 +1,306 @@
+\documentclass{beamer}
+
+\usepackage[normalem]{ulem}
+\usepackage{amsmath,amssymb,amsthm,array}
+\usepackage{bm}
+\usepackage{textcomp}
+\usepackage{xltxtra}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{listings}
+\usepackage[square, numbers, comma, sort&compress]{natbib}
+
+\usetheme{CambridgeUS}
+\usecolortheme{dolphin}
+\setmainfont[Mapping=TeX-text]{GFS Neohellenic}
+\usefonttheme{serif}
+\setbeamertemplate{navigation symbols}{}
+
+\title{Paillier and Damg{\aa}rd-Jurik cryptosystems}
+
+\defbeamertemplate*{footline}{shadow theme}
+{%
+  \leavevmode%
+  \hbox{\begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm plus1fil,rightskip=.3cm]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertframenumber\,/\,\inserttotalframenumber\hfill\insertshortauthor (\insertshortinstitute)
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle%
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\setlength{\columnseprule}{0.4pt}
+\begin{document}
+\newcommand{\zns}[1]{ \mathbb{Z}_{#1}^* }
+\newcommand{\zn}[1]{ \mathbb{Z}_{#1}}
+\newcommand{\md}[1]{\quad (mod \, {#1})}
+ 
+ 
+\begin{frame}
+\titlepage
+\end{frame}
+
+\section{Paillier cryptosystem \cite{Paillier99}}
+\frame{\sectionpage}
+\begin{frame}[allowframebreaks]{Key Generation}
+
+\begin{itemize}
+\item Choose two large primes $p,q$ randomly and independently such that $gcd(p  q,(p-1)  (q-1))=1$.
+\item It can be proved that this property is easily attained, if $p,q$ are of the same length $\eta$ 
+\item Calculate RSA modulus $ n = pq $ 
+\item Calculate Carmichael's Function $ \bm{\lambda} = lcm(p-1,q-1)= \frac{(p-1) (q-1)}{gcd(p-1,q-1)} $.
+\item This function is easy to calculate if we know $p,q$ and has the following very important properties:
+\begin{itemize}
+	\item $ \forall x \in \zns{n^2}: x^{\lambda(n)} =  1 \md{n} $ because of Carmichael's Theorem
+	\item $ \forall x \in \zns{n^2}: x^{n  \lambda(n)} =  1 \md{n^2} $ because $n\lambda(n)=\lambda(n^2)$
+\end{itemize}
+\item Select generator $g \in \zns{n^2}$ such that the order of $g$ is a non zero multiple of $n$.
+\item Calculate inverse  $\bm{\mu} = L(g^\lambda \md{n^2} )^{-1} \md{n}$  where  $L(x) = \frac{x-1}{n} $. 
+\item This function is very important in the Paillier cryptosystem. Its role can be summarized as:
+\begin{itemize}
+\item $L()$ is given elements that are equal to $1 \md{n}$
+\item $L()$ \textit{'solves'} the discrete log problem and \textit{'decrypts'}
+\item The inverse to be calculated, always exists if $g$ is a valid generator
+\end{itemize}
+\item Release the keys. The public key is $(n,g)$ and the private key $(\lambda,\mu)$ 
+\end{itemize} 
+\end{frame}
+
+\begin{frame}{Encryption and Decryption}
+
+\textbf{Encryption}: $\zn{n} \times \zns{n} \rightarrow \zns{n^2}$
+
+\begin{itemize}
+\item Encode message $m$ into $\zn{n}$
+\item Select random $r \in \zns{n}$
+\item Return $c = Enc(m,r) = g^m  r^n \md{n^2}$
+\end{itemize}
+ 
+\textbf{Decryption}: $\zns{n^2} \rightarrow \zn{n}$
+ 
+\begin{itemize}
+\item Ciphertext $c \in \zns{n^2}$
+\item Return $m = L(c^\lambda \, mod \, n^2)  \mu \, ( mod \, n) = \frac{L(c^\lambda \, mod \, n^2)}{L(g^\lambda \, mod \, n^2)} (mod n) $
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Security}
+\begin{itemize}
+\item The security of the Paillier cryptosystem depends on the \textbf{composite residuosity problem} - a generalisation of quadratic residuosity
+\item Informally: distinguish a random element of $\zns{n^2}$ from an $n-residue$
+\item More formally:Given $n=p  q$ and $z \in \zns{n^2}$ decide if $z$ is $n-residue$ modulo $n^2$, does there exist $y \in \zns{n^2}$ st: $z = y^n \md{n^2}$. 
+\end{itemize}
+ 
+
+\begin{block}{Decisional Composite Residuosity Assumption-DCRA}
+There is no probabilistic polynomial time algorithm to decide the composite residuosity problem
+\end{block}
+
+Observe that if there was an algorithm to check if $z \in \zns{n^2}$ is the encryption of message $0$ then we could solve the composite residuosity problem. 
+\end{frame}
+
+
+
+\begin{frame}[allowframebreaks]{Proving Correctness}
+
+\begin{block}{Theorem}
+For $c = Enc(m,r) = g^m  r^n \md{n^2}$ the decryption operation $ \frac{L(c^\lambda \md{n^2})}{L(g^\lambda \md{n^2}} \md{n}$ yields $m$.
+\end{block}
+
+\textbf{Helpers}
+
+\begin{itemize}
+\item \textbf{Fact:}  $g=n+1$ can always be used. Proof in \cite{Damgard2001}
+\item Notation: $[c]_{n+1}$ refers to the plaintext that corresponds to ciphertext $c$ using $g=n+1$
+\item This means that: $w=Enc_{n+1}([w]_{n+1},r)$
+\end{itemize}
+
+\begin{block}{Roadmap}
+\begin{enumerate}
+\item $ \forall x \in \zn{n} : (1+n)^x = 1 + n  x  \md{n^2} $ 
+\item $ \forall c \in \zns{n^2}, $ and proper generators $g_1,g_2$   : $\quad [c]_{g_1} = [c]_{g_2}  [g_2]_{g_1} $
+\item $ \forall \, w \, \in \zns{n^2}:  \bm{L(w^\lambda \md{n^2}) = \lambda [w]_{n+1} \md{n}}$ 
+\end{enumerate}
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Step 1}
+\begin{block}{Lemma}
+ $ \forall x \in \zn{n} : (1+n)^x = 1 + n  x  \md{n^2} $
+\end{block}
+
+\begin{block}{Proof}
+Most terms of the binomial expansion are zero in $\zn{n^2}$:
+ 
+$(1+n)^x \md{n^2} = 1 + {x \choose  1}  n + {x \choose  2}  n^2 + \cdots  + {x \choose  x}n^x  \md{n^2} = 1 + x  n	\md{n^2}$
+
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Step 2}
+\begin{block}{Lemma}
+$ \forall c \in \zns{n^2}, $ and proper generators $g_1,g_2$   : $\quad [c]_{g_1} = [c]_{g_2}  [g_2]_{g_1} $
+\end{block}
+
+\begin{block}{Proof}
+Let $y = [g_2]_{g_1}$. This means that: $g_2  = g_1^y b^n$ where $b \in_R \zns{n}$
+
+Let $z= [c]_{g_2}$. This means that $c = g_2^z  d^n$ where $d \in_R \zns{n}$.
+
+Now $c = g_2^z  d^n  = (g_1^y  b^n)^{z}  d^n = g_1^{zy}   (b^z  d) ^n$ which means that $y  z = [c]_{g_1}$
+
+Rewriting gives us $[c]_{g_1} = [c]_{g_2}  [g_2]_{g_1}$ 
+\end{block}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Step 3:}
+\begin{block}{Main Lemma}
+$\forall \, w \, \in \zns{n^2}:  \bm{L(w^\lambda \,mod \, n^2) = \lambda [w]_{n+1} \, mod \, n}$
+\end{block}
+
+Since $n+1$ is a proper g, $\forall \, w \, \in \zns{n^2}:$ by definition:
+
+$$w=Enc_{n+1}([w]_{n+1},r)=(n+1)^{[w]_{n+1}}  r ^ n \md{n^2}$$
+
+Now decryption computes: 
+ 
+$$w^\lambda 	= (n+1)^{\lambda  [w]_{n+1}}  r ^ {n\lambda} \md{n^2}$$
+
+Because of the binomial terms disappearing $\md{n^2}$ we get:
+
+$$w^\lambda =  (1 + \lambda  [w]_{n+1}  n)   r ^ {n\lambda} \md{n^2}$$
+
+Since $n\lambda(n)=\lambda(n^2)$: 
+
+$$w^\lambda =  (1 + \lambda  [w]_{n+1}  n)   r ^ {\lambda(n^2)} \md{n^2}$$
+
+which leaves:
+
+$$w^\lambda    		= (1 + \lambda  [w]_{n+1}  n) $$
+
+Then: $L(w^\lambda) = \frac {w^\lambda - 1} { n }= \lambda  [w]_{n+1}$
+ 
+So during the decryption operation: 
+\begin{flalign*}
+\frac{L(c^\lambda \, mod \, n^2)}{L(g^\lambda \, mod \, n^2)} = \\
+\frac{ \lambda  [c]_{n+1} }{ \lambda  [g]_{n+1}} = \\
+\frac{    [c]_{n+1} }{   [g]_{n+1}} = 
+\frac{    [c]_{g}  [g]_{n+1} }{   [g]_{n+1}} = [c]_{g} = m
+\end{flalign*}
+\end{frame}
+
+\section{The Damg{\aa}rd-Jurik cryptosystem \cite{Damgard2001}}
+\frame{\sectionpage}
+\begin{frame}[allowframebreaks]{Key Generation}
+
+For each $s \geq 1$ a cryptosystem $\mathcal{CS}_s$ and g=$n+1$ a generalisation and simplification can be defined
+$s$ can be selected at any point in time before encryption, as long as $ m < n^s$ 
+
+\begin{itemize}
+\item Public key is $n=pq$
+\item Private key is $\lambda = lcm (p-1, q-1)$
+\item \textbf{Output:} Public key is $n$ and private key is $\lambda$ 
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Encryption $\zn{n^s} \times \zns{n} \rightarrow \zns{n^{s+1}}$}
+\begin{itemize}
+\item Choose $s$ that the message $m$ can be encoded into $\zn{n^s}$
+\item Select random $r \in \zns{n}$
+\item Return $c = Enc(m,r) = (1+n)^m  r^{n^s} \md{n^{s+1}}  $
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[allowframebreaks]{Decryption $\zns{n^{s+1}} \rightarrow \zn{n^s}$}
+\begin{itemize}
+\item Ciphertext $c \in \zns{n^{s+1}}$. Discover s by the length of $c$
+\item Calculate $c^\lambda \md{n^{s+1}} = (1+n)^{m  \lambda \md{n^{s}}}  r^{\lambda  n^s} \md{n^{s+1}} = (1+n)^{m  \lambda} \md{n^{s+1}} $ because $ r^{\lambda  n^s} = r^{\lambda{n^{s+1}}} = 1 \md{n^{s+1}} $
+\item  Compute $m  \lambda$ from $ (1+n)^{m  \lambda} \md{n^{s+1}} $. In order to do this we shall use the $L()$ function $ \md{n^s}$, taking into account that some terms will be reduced to $0 \md{n^s}$
+\end{itemize}
+
+\begin{align*}
+L((1+n)^{m  \lambda} \md{n^{s+1}}) = \\
+\frac{1-(1+n)^{m  \lambda} \md{n^{s+1}}}{n} \md{n^s} = \\
+m  \lambda + {m  \lambda \choose 2}n + \cdots + {m  \lambda \choose s}n^{s-1} \md{n^s}
+\end{align*}
+ 
+\begin{block}{Message Extraction}
+\begin{itemize}
+\item We cannot extract $m  \lambda$ as easily as in the case of $n^2$
+\item \textbf{Solution}: Extract it step-by-step. Notation switch: extracting $i$
+\item First extract the value of $i \md{n}$
+\item The extract $i \md{n^2}$ and so on ...
+\item Compare to accumulating the digits of a number from the LSB to the MSB (first the final one, then the final two etc)
+\item If we have computed $i_{j-1}$ then $i_j = i_{j-1} + kn^{j-1}$ where $k \in \{0, \cdots n-1\}$
+\end{itemize}
+\end{block}
+
+\begin{align*}
+L((1+n)^{i} \md{n^{j+1}})= \\
+i_j + {i_j \choose 2}n + \cdots + {i_j  \choose j} n^{j-1} \md{n^j} = \\
+i_{j-1} + kn^{j-1} + { i_{j-1} \choose 2}n + \cdots + { i_{j-1} \choose {j}} \md{n^j} 
+\end{align*} 
+
+The crucial step is the replacement: ${i_j \choose t} n^{t-1} = {i_{j-1} \choose t} n^{t-1}$ which holds because:
+
+\framebreak
+
+\begin{align*}
+{i_j \choose t} n^{t-1} = n^{t-1} \prod_{x=1}^{t} \frac{i_j-(t-x)}{x} = \\
+\frac{n^t}{n} \prod_{x=1}^{t} \frac{i_j-(t-x)}{x} = \frac{1}{n} \prod_{x=1}^{t} \frac{n(i_j-(t-x))}{x} = \\
+\frac{1}{n} \prod_{x=1}^{t} \frac{n(i_{j-1}+kn^{j-1}-(t-x))}{x} = \\
+\frac{1}{n} \prod_{x=1}^{t} \frac{(ni_{j-1}+kn^{j}-n(t-x))}{x} = \frac{1}{n} \prod_{x=1}^{t} \frac{(ni_{j-1}-n(t-x))}{x} =\\
+\frac{n^t}{n} \prod_{x=1}^{t} \frac{(i_{j-1}-(t-x))}{x} = n^{t-1} {i_{j-1} \choose t}
+\end{align*}
+
+\framebreak
+
+\begin{itemize}
+\item As a result: $L((1+n)^{i} \md{n^{j+1}}) =   kn^{j-1} + i_{j-1} + { i_{j-1} \choose 2}n + \cdots + { i_{j-1} \choose {j}} \md{n^j} $ 
+\item which means that:$kn^{j-1} = L((1+n)^{i} \md{n^{j+1}}) - ({ i_{j-1} \choose 2}n + \cdots + { i_{j-1} \choose {j}})  \md{n^j}$
+\item If we replace $kn^{j-1}$ in  $i_j = i_{j-1} + kn^{j-1}$ we get:
+\begin{align*}
+i_j = L((1+n)^{i} \md{n^{j+1}}) - ({i_{j-1} \choose 2}n + \cdots + {i_{j-1} \choose j}n^{j-1} )\md{n^j}
+\end{align*}
+\item After extraction we can retrieve $m$ from $m\lambda$ by multiplying with $\lambda{-1} \md{n^{s+1}}$
+\end{itemize}
+
+\begin{theorem}
+$\forall s$ the simplified version is one way if Paillier ($\mathcal{CS}_1$) is one way and semantically secure iff the DCRA is true.
+\end{theorem}
+
+\end{frame} 
+
+\begin{frame}[fragile]{Extraction algorithm in Python}
+\begin{lstlisting}[language=python]
+    i=0
+    for j in range(1,s+1):
+        nj = n**j
+        t1=(x%(nj*n)-1)//n
+        t2=i
+        sum=0
+        for k in range(2,j+1):
+            sum += binomial(t2,k)*n**(k-1)%nj
+        t1=(t1-sum)%nj
+        i=t1
+\end{lstlisting}
+ 
+\end{frame}
+
+\begin{frame}[allowframebreaks]{References}
+\begin{small}
+\nocite{*}
+\bibliographystyle{alpha}
+\bibliography{paillier2}
+\end{small}
+\end{frame}
+
+\end{document}

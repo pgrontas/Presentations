@@ -1,0 +1,256 @@
+\documentclass{beamer}
+
+\usepackage[normalem]{ulem}
+\usepackage{amsmath,amssymb,amsthm,array}
+\usepackage{bm}
+\usepackage{textcomp}
+\usepackage{xltxtra}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{listings}
+\usepackage[square, numbers, comma, sort&compress]{natbib}
+
+\usetheme{CambridgeUS}
+\usecolortheme{dolphin}
+\setmainfont[Mapping=TeX-text]{GFS Neohellenic}
+\usefonttheme{serif}
+\setbeamertemplate{navigation symbols}{}
+
+\title{Επιθέσεις και Ασφάλεια Κρυπτοσυστημάτων}
+
+\defbeamertemplate*{footline}{shadow theme}
+{%
+  \leavevmode%
+  \hbox{\begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm plus1fil,rightskip=.3cm]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertframenumber\,/\,\inserttotalframenumber\hfill\insertshortauthor (\insertshortinstitute)
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle%
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\setlength{\columnseprule}{0.4pt}
+\begin{document}
+\newcommand{\zns}[1]{ \mathbb{Z}_{#1}^* }
+\newcommand{\zn}[1]{ \mathbb{Z}_{#1}}
+\newcommand{\md}[1]{\quad (mod \, {#1})}
+\newcommand{\adv}{\mathcal{A}}
+ 
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Επιθέσεις ενεργητικού αντιπάλου $\adv$} 
+
+\begin{block}{Chosen Plaintext Attack}
+\begin{itemize}
+\item Ικανότητα: Ο $\adv$ μπορεί να κρυπτογραφεί μηνύματα της αρεσκείας του
+\item Στόχος: Ο $\adv$ θέλει να μάθει την αποκρυπτογράφηση ενός κρυπτοκειμένου
+\end{itemize}
+\end{block}
+
+\begin{block}{Chosen Ciphertext Attack}
+\begin{itemize}
+\item Ικανότητα: Ο $\adv$ μπορεί να κρυπτογραφεί μηνύματα της αρεσκείας του
+\item Ικανότητα: Ο $\adv$ μπορεί να αποκρυπτογραφεί κάποια μηνύματα της αρεσκείας του
+\item Στόχος: Ο $\adv$ θέλει να μάθει την αποκρυπτογράφηση ενός συγκεκριμένου διαφορετικού μηνύματος
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Indistinguishability under Chosen Plaintext Attack (IND-CPA)}
+
+\begin{block}{CPA Game}
+\begin{itemize}
+\item Δημιουργία ζεύγους κλειδιών (PK,SK)
+\item Δημοσίευση PK
+\item Ο $\adv$ μπορεί να κρυπτογραφεί πολυωνυμικό πλήθος μηνυμάτων
+\item Τελικά υποβάλλει δύο μηνύματα $ M_0, M_1 $  στο σύστημα
+\item Το σύστημα διαλέγει τυχαία 1 bit $b$ και αποστέλλει το $C=Enc(M_b)$ στον $\adv$
+\item Ο $\adv$ μπορεί να συνεχίσει να κρυπτογραφεί πολυωνυμικό πλήθος μηνυμάτων και να κάνει οποιονδηποτε υπολογισμό θέλει.
+\item Τελικά μαντεύει το $b$
+\end{itemize}
+\end{block}
+
+\begin{block}{Ορισμός ασφάλειας}
+Το κρυπτοσύστημα έχει την ιδιότητα IND-CPA αν κάθε PPT $\adv$ έχει αμελητέο πλεονέκτημα στον υπολογισμό του $b$ από το να μαντέψει τυχαία.
+\end{block}
+
+\end{frame}
+
+
+\begin{frame}[allowframebreaks]{Indistinguishability under Chosen Ciphertext Attack (IND-CCA)}
+
+CCA Game
+
+\begin{itemize}
+\item Δημιουργία ζεύγους κλειδιών (PK,SK)
+\item Δημοσίευση PK
+\item Ο $\adv$ μπορεί να κρυπτογραφεί πολυωνυμικό πλήθος μηνυμάτων
+\item Ο $\adv$ χρησιμοποιεί το σύστημα ως \textit{decryption oracle} και μπορει να αποκρυπτογραφήσει συγκεκριμένα μηνύματα
+\item Τελικά υποβάλλει δύο μηνύματα $ M_0, M_1 $  στο σύστημα, διαφορετικά από αυτα που μπορει να αποκρυπτογραφήσει
+\item Το σύστημα διαλέγει τυχαία 1 bit $b$ και αποστέλλει το $C=Enc(M_b)$ στον $\adv$
+\item Ο $\adv$ μπορεί να συνεχίσει να κρυπτογραφεί πολυωνυμικό πλήθος μηνυμάτων και να κάνει οποιονδηποτε υπολογισμό θέλει
+\item Προαιρετικά ο $\adv$ μπορει να συνεχίσει να χρησιμοποιεί το \textit{decryption oracle} 
+\item Τελικά μαντεύει το $b$
+\end{itemize}
+
+
+\begin{block}{Ορισμός ασφάλειας}
+Το κρυπτοσύστημα έχει την ιδιότητα IND-CCA1 αν κάθε PPT $\adv$ έχει αμελητέο πλεονέκτημα στον υπολογισμό του $b$ από το να μαντέψει τυχαία.
+
+Αν ισχύει το προαιρετικό βήμα το κρυπτοσύστημα είναι IND-CCA2 (adaptive IND-CCA)
+\end{block}
+
+\begin{block}{Malleability:Μια σχετική ιδιότητα}
+Οποιαδηποτε αλλαγή στο ciphertext οδηγεί σε αντίστοιχη αλλαγή στο plaintext. Κάποιες φορές είναι επιθυμητή και κάποιες όχι.
+\end{block}
+
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Παραδείγματα με \textit{παραδοσιακό} RSA}
+\begin{block}{To παραδοσιακό RSA δεν είναι IND-CPA γιατί είναι deterministic}
+Αν τα πιθανά μηνύματα είναι:
+\begin{itemize}
+\item $m_1$ = "Buy IBM"
+\item $m_2$ = "Sell IBM"
+\end{itemize}
+τότε ο $\adv$ μπορεί να τα κρυπτογραφήσει και να τα συγκρίνει με το νόμιμο ciphertext
+\end{block}
+
+\begin{block}{To παραδοσιακό RSA είναι malleable}
+\begin{itemize}
+\item Στόχος: Αλλοίωση του $c = m^e \md{n}$
+\item $c' = c (\frac{9}{10})^e \md{n} = (m \frac{9}{10})^e \md{n}$
+\item H αποκρυπτογράφηση δίνει το $m \frac{9}{10}$
+\item Ο $\adv$ μπορεί να \textit{αλλοιώσει} κάποιο μήνυμα χωρίς να το γνωρίζει
+\end{itemize}
+\end{block}
+
+\begin{block}{To παραδοσιακό RSA δεν είναι IND-CCA}
+Ο $\adv$ μπορεί να αποκρυπτογραφήσει μηνύματα επιλογής του
+\begin{itemize}
+\item Στόχος: Αποκρυπτογράφηση του $c = m^e \md{n}$
+\item Μπορεί να αποκρυπτογραφήσει το $ c'= c x^e \md{n}$ όπου το $x$ είναι δικής του επιλογής
+\item Ανακτά το $m = \frac{m'}{x}$ 
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Παραδείγματα με \textit{παραδοσιακό} ElGamal}
+
+To ElGamal είναι IND-CPA αν ισχύει η DDH assumption
+
+\begin{block}{To παραδοσιακό El Gamal είναι malleable}
+\begin{itemize}
+\item Στόχος: Αλλοίωση του $c = (G,M) = (g^r, m h^r)$
+\item $c' = (G',M') = (G g^{r'}, M \frac{9}{10} h^{r'}) = (g^{r+r'}, m \frac{9}{10} h^{r+r'}) $
+\item H αποκρυπτογράφηση $\frac{M'}{G'^x} $ δίνει το $m \frac{9}{10}$
+\item Ο $\adv$ μπορεί να \textit{αλλοιώσει} κάποιο μήνυμα χωρίς να το γνωρίζει
+\end{itemize}
+\end{block}
+
+\begin{block}{To παραδοσιακό El Gamal δεν είναι IND-CCA}
+Ο $\adv$ μπορεί να αποκρυπτογραφήσει μηνύματα επιλογής του
+\begin{itemize}
+\item Στόχος: Αποκρυπτογράφηση του $c = (G,M) = (g^r, m h^r)$
+\item $c' = (G',M') = (G g^{r'}, M a h^{r'}) = (g^{r+r'}, m a h^{r+r'}) $ όπου το $a$ επιλέγεται από τον $\adv$
+\item H αποκρυπτογράφηση $\frac{M'}{G'^x} $ δίνει το $am$ και κατά συνέπεα το $m$
+\item Ο $\adv$ μπορεί να \textit{αλλοιώσει} κάποιο μήνυμα χωρίς να το γνωρίζει
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Λύσεις RSA}
+\begin{block}{Randomised Encryption}
+\begin{itemize}
+\item Αντί για κρυπτογράφηση $m$ κρυπτογράφηση $f(m,r)$ όπου $r$ random
+\item Η $f$ είναι εύκολα αντιστρέψιμη από οποιονδήποτε
+\item Μια απλή υλοποίηση της $f$: random padding
+\item Χρήση στο SSL μέχρι πρόσφατα: PKCS1
+\end{itemize}
+\end{block}
+
+\begin{block}{Η επίθεση του Bleichenbacher (1998) \cite{Bleichenbacher98chosenciphertext}}
+\begin{itemize}
+\item Στόχος: Αποκρυπτογράφηση του $c = f(m,r)^e \md{n}$
+\item Αποστολή πολλών μηνυμάτων της μορφής $ c'= c x^e \md{n}$ με τυχαια $x$
+\item O $\adv$ προσπαθεί να βρει μηνύματα $m'$ για τα οποία $f(m',r) = (c')^d \md{n}$
+\item Ανακτά το $m = \frac{m'}{x}$ 
+\item Πρακτικά: χρήση $SSL$ error codes ως decryption oracle
+\item Με 300.000 εως 2.000.000 $c'$ μπορεί να αποκρυπτογραφηθεί το $c$
+\item \textbf{Λύση}: RSA - OAEP secure in the random oracle model \cite{Bellare95optimalasymmetric}
+\end{itemize}
+\end{block}
+ 
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Λύσεις El Gamal:Cramer Shoup cryptosystem \cite{cs98}}
+\begin{itemize}
+\item Ronald Cramer, Victor Shoup, Crypto 1998
+\item Επέκταση του El Gamal
+\item Χρηση συνάρτησης σύνοψης $H$
+\item Αν ισχυει η υπόθεση DDH, τότε παρέχει IND-CCA2
+\end{itemize}
+
+\begin{block}{Δημιουργία Κλειδιών}
+\begin{itemize}
+\item Επιλογή πρώτων $p,q$ με $p=2q+1$
+\item $G$ ειναι η υποομάδα ταξης $q$ στον $\zns{p}$
+\item Επιλογή random generators $g_1, g_2$
+
+\item Επιλογή τυχαίων στοιχείων $x_1,x_2,y_1,y_2,z \in \zn{q}$
+\item $c=g_1^{x_1}g_2^{x_2} d=g_1^{y_1}g_2^{y_2},h=g_1^{z}$
+\item Δημόσιο Κλειδί: $(c,d,h)$
+\item Μυστικό Κλειδί: $(x_1,x_2,y_1,y_2,z)$
+\end{itemize}
+\end{block}
+
+\begin{block}{Κρυπτογράφηση}
+\begin{itemize}
+\item Μετατροπή μηνύματος $m$ στο $G$
+\item Επιλογή τυχαίου $r \in \zn{q}$
+\item Υπολογισμός
+\begin{itemize} 
+\item $u_1 = g_1^r,u_2 = g_2^r$
+\item $e = m h^r$
+\item $\alpha = H(u_1,u_2,e)$
+\item $v = c^r d^{r\alpha}$ 
+\end{itemize}
+\item Κρυπτογράφημα: $(u_1,u_2,e,v)$
+\end{itemize}
+\end{block}
+
+\begin{block}{Αποκρυπτογράφηση}
+\begin{itemize}
+\item Υπολογισμός $\alpha = H(u_1,u_2,e)$
+\item Έλεγχος αν $u_1^{x_1}u_2^{x_2}(u_1^{y_1}u_2^{y_2})^\alpha=v$. Σε περίπτωση αποτυχίας έξοδος χωρίς αποκρυπτογράφηση
+\item Σε περιπτωση επιτυχίας υπολογισμός $m = \frac{e}{u_1^z}$
+\end{itemize}
+\end{block}
+
+\begin{block}{Παρατηρήσεις}
+\begin{itemize}
+\item $h,z$ αντιστοιχούν σε δημόσιο - ιδιωτικό κλειδί  El Gamal
+\item $u_1, e$ αντιστοιχούν στο κρυπτογράφημα του El Gamal
+\item H $H$ μπορεί να αντικατασταθεί για αποφυγή του random oracle
+\item $u_2,v$ λειτουργεί ως έλεγχος ακεραιότητας, ώστε να  μπορεί να αποφευχθεί το malleability 
+\item Διπλάσια πολυπλοκότητα από ElGamal τόσο σε μέγεθος κρυπτοκειμένου, όσο και σε υπολογιστικές απαιτήσεις
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{References}
+\begin{small}
+\nocite{*}
+\bibliographystyle{alpha}
+\bibliography{attacks}
+\end{small}
+\end{frame}
+
+\end{document}
