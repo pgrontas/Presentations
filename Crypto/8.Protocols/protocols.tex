@@ -1,0 +1,310 @@
+\documentclass{beamer}
+
+
+\usepackage{amsmath,amssymb,amsthm,array}
+\usepackage{bm}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{algorithm}
+\usepackage{hyperref}
+\usepackage{algorithmic}
+\usepackage[normalem]{ulem}
+\usepackage{fontspec}
+\usepackage{numprint}
+
+\setmainfont{Arial}
+
+
+\usetheme{metropolis} 
+ 
+\setbeamertemplate{navigation symbols}{}
+\title{Κρυπτογραφικά Πρωτόκολλα}
+\author{Παναγιώτης Γροντάς}
+\date{05/12/2017}
+\defbeamertemplate*{footline}{shadow theme}
+{%
+  \leavevmode%
+  \hbox{
+		\begin{beamercolorbox}[wd=.4\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
+			\usebeamerfont{title in head/foot} Cryptographic Protocols  %
+		\end{beamercolorbox}
+		\begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
+			\usebeamerfont{title in head/foot} \hfill \insertsection  %
+		\end{beamercolorbox}
+		\begin{beamercolorbox}[wd=.1\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm plus1fil,rightskip=.3cm]{author in head/foot}%
+			\usebeamerfont{author in head/foot}\insertframenumber\,/\,\inserttotalframenumber
+		\end{beamercolorbox}%
+  }%
+  \vskip0pt%
+}
+
+\institute{ΕΜΠ - Κρυπτογραφία - (2017-2018)}
+ \hypersetup{
+  pdfauthor={Panagiotis Grontas},
+  pdftitle={Protocols},
+  colorlinks=true,
+  urlcolor=blue,
+  linkcolor=white
+}
+
+\setlength{\columnseprule}{0.4pt}
+\begin{document}
+\newcommand{\xor}{ \oplus }
+\newcommand{\msg}{ \mathtt{M} }
+\newcommand{\KEY}{ \mathtt{K} }
+\newcommand{\CPH}{ \mathtt{C} }
+\newcommand{\keygen}{\mathtt{KeyGen}}
+\newcommand{\enc}{\mathtt{Encrypt}}
+\newcommand{\dec}{\mathtt{Decrypt}}
+\newcommand{\sign}{\mathtt{Sign}}
+\newcommand{\verify}{\mathtt{Verify}}
+\newcommand{\adv}{$\mathcal{A}$ }
+\newcommand{\Hash}{\mathcal{H} }
+\newcommand{\advb}{$\mathcal{B}$ }
+\newcommand{\chal}{$\mathcal{C}$ }
+\newcommand{\cs}{$\mathcal{CS}$}
+\newcommand{\Zed}{\mathbb{Z}} 
+\newcommand{\zns}{\mathbb{Z}^*_n}
+\newcommand{\zs}[1]{\mathbb{Z}^*_{#1}}
+
+\newcommand{\green}[1]{\textcolor{teal}{#1}}
+\newcommand{\Green}[1]{\textcolor{Teal}{#1}}
+\newcommand{\ForestGreen}[1]{\textcolor{ForestGreen}{#1}}
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\magenta}[1]{\textcolor{magenta}{#1}}
+\newcommand{\cyan}[1]{\textcolor{cyan}{#1}}
+
+\newcommand{\twopartdef}[4]
+{ 
+		\begin{cases}
+			#1 , #2 \\
+			#3 , #4
+		\end{cases} 
+}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+	
+ 
+
+ 
+\begin{frame}{Το πρόβλημα}
+	\begin{itemize}
+		\item $m$ παίκτες θέλουν να υπολογίσουν από κοινού την τιμή της συνάρτησης $f(x_1, x_2, \cdots x_m)$
+		\item Κάθε παίκτης $P_i$ συνεισφέρει την είσοδο $x_i$
+		\item Γενίκευση: κάθε παίκτης διαθέτει τη δική του συνάρτηση $f_i$, αλλά χρειάζεται είσοδο από όλους
+		\item Μπορεί να γίνει;
+		\begin{itemize}
+			\item Χωρίς να αποκαλυφθεί καμία πληροφορία εκτός από το αποτέλεσμα
+			\item Υποθέσεις ασφάλειας
+			\item Πολυπλοκότητα: Υπολογισμών / Επικοινωνίας
+		\end{itemize}
+		\item Δεν είναι αποδεκτή η χρήση TTP
+	\end{itemize}
+\end{frame}
+  
+\begin{frame}{Two party computation}
+	\begin{block}{Το πρόβλημα των εκατομμυριούχων (Yao-1982)}
+	\begin{itemize}
+		\item Δύο εκατομμυριούχοι (Alice, Bob) θέλουν να δουν ποιος είναι πιο πλούσιος
+		\item Χωρίς να αποκαλυφθεί	η περιουσία τους
+		\item $f(a,b) = $ if $a<b$ then $1$ else $0$
+		\item Υπόθεση: $1 \leq a,b \leq n$
+	\end{itemize}
+	\end{block}
+\end{frame}
+
+\begin{frame}{Το πρόβλημα των εκατομμυριούχων - Η λύση του Yao}
+	\begin{itemize}
+		\item Ο Bob
+		\begin{itemize}
+			\item Δημιουργεί $n$ ταυτόσημα κουτιά (σχήμα δέσμευσης)
+			\item Διαλέγει έναν αριθμό $x$ και τον τοποθετεί στο κουτί $b$
+			\item Στα υπόλοιπα τοποθετεί τυχαίους αριθμούς 
+		\end{itemize} \pause 
+		\item H Alice
+		\begin{itemize}
+			\item Ανοίγει όλες τις δεσμεύσεις
+			\item Αφήνει τα πρώτα $a$ κουτιά ίδια
+			\item Προσθέτει 1 στα υπόλοιπα $n-a$
+			\item Τα στέλνει πίσω στον Bob
+		\end{itemize} \pause 
+		\item Ο Bob
+		\begin{itemize}
+			\item Ελέγχει τα κουτιά
+			\item Αν στο κουτί $b$ υπάρχει το $x+1$ είναι πλουσιότερος
+			\item Αλλιώς: Η Alice είναι
+		\end{itemize} \pause 
+		\item \alert{Προβλήματα} \pause 
+		\begin{itemize}
+			\item Εκθετικό πλήθος δεσμεύσεων (ως προς τα bits της περιουσίας)
+			\item Ενεργοί αντίπαλοι (τερματισμός πριν την αποκάλυψη)
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Γενίκευση: ανταλλαγή μυστικών}
+	\begin{itemize}
+		\item Οι Alice, Bob θέλουν να ανταλλάξουν τα μυστικά $s_a,s_b$ χωρίς TTP
+		\item Ταυτόχρονη ανταλλαγή (ο ένας μαθαίνει αν ο άλλος έλαβε το μυστικό)
+		\item Αποφυγή τερματισμού 
+		\item Πρόβλημα
+		\begin{itemize}
+			\item $s_a = f(a_1, \cdots, a_n)$
+			\item $s_b = f(b_1, \cdots, b_n)$
+			\item $\exists k:$ ώστε να μπορεί να υπολογιστεί το $s_a$, αλλά όχι το $s_b$
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Η λύση του Rabin με τετραγωνικά υπόλοιπα}
+	\includegraphics[scale=0.4]{rabinQR.png}
+	\framebreak
+	\includegraphics[scale=0.4]{rabinEOS.png}
+\end{frame}
+
+\begin{frame}{Γενίκευση: Μη συνειδητή μεταφορά (oblivious transfer)}
+\begin{block}{Ορισμός $OT(S,R,M)$ (Even, Goldreich, Lempel)}
+	Μη συνειδητή μεταφορά $OT(S,R,M)$ είναι ένα πρωτόκολλο με το οποίο ο αποστολέας $S$ μεταφέρει ένα μηνυμα $M$ στον παραλήπτη $R$ έτσι ώστε ο $R$ λαμβάνει το μήνυμα $Μ$ με πιθανότητα $1/2$ και:
+	\begin{itemize}
+		\item Αν ο $R$ δεν λάβει το μήνυμα, δεν μαθαίνει ούτε κάποια χρήσιμη πληροφορία
+		\item Οποιαδήποτε προσπαθεια μη εκτέλεσης του πρωτοκόλλου γίνεται αντιληπτή
+	\end{itemize}
+\end{block}
+Αφαιρετική αναπαράσταση καναλιού με θόρυβο
+\end{frame}
+
+\begin{frame}{Παραλλαγή: $1$-από-$2$ Μη-Συνειδητή Μεταφορά}
+\begin{block}{$OT_1^2(S,R,$ $M_1,M_2)$}
+	O $R$ επιλέγει μεταξύ δύο μηνυμάτων για μεταφορά με πιθανότητα ${1}/{2}$ και ο $S$ το μεταφέρει χωρίς ασφαλώς  να γνωρίζει ποιο μετέφερε. Μπορούμε να προσομοιώσουμε την τυχαία επιλογή χρησιμοποιώντας ένα bit.
+\end{block}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\textwidth]{ot12.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Άλλες παραλλαγές}
+	\begin{block}{$OT_1^n(S,R,M_1,\cdots,M_n)$}
+		O $R$ επιλέγει μεταξύ $n$ μηνυμάτων να λάβει το $i$. Φυσικά ο $S$ δεν το μαθαίνει, ενώ ο $R$ δεν μαθαίνει τα $M_j, j \neq i$
+	\end{block}	
+
+	$k$-από-$n$ Μη-Συνειδητή Μεταφορά
+	\begin{itemize}
+			\item O $R$ λαμβάνει ταυτόχρονα $k$ μηνύματα
+			\item O $R$ λαμβάνει σειριακά $k$ μηνύματα που μπορούν να τροποποιηθούν με βάση τα προηγούμενα (adaptive)
+	\end{itemize}
+\end{frame} 
+
+\begin{frame}{Πρακτική κατασκευή $OT_1^2$}
+	\begin{itemize}
+	\item Χρήση κρυπτοσυστήματος δημοσίου κλειδιού με $\mathcal{M} = \mathcal{C}$
+	\item Τυχαία επιλογή  $x_0, x_1 \in \{0,1\}^*$ 
+	\item Για να ληφθεί το $M_0$ ο $R$:
+	\begin{itemize}
+		\item Στέλνει στον $S$ το $(Enc(x_0),x_1)$
+		\item Ο $S$ αποκρυπτογραφεί, παράγοντας το $(x_0, Dec(x_1))$.  
+		\item Τελικά ο $S$ αποστέλλει το $(M_0 \xor x_0, M_1 \xor Dec(x_1))$
+		\item Τελικά ο $R$ ανακτά το $M_0$ με XOR του πρώτου συστατικού: $M_0 \xor x_0 \xor x_0$
+	\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Yao's Garbled Circuits}
+	\begin{itemize}
+		\item Χρήση $OT$ για κατασκευή κυκλώματος $C$ που υπολογίζει ασφαλώς ως προς παθητικό αντίπαλο μια συνάρτηση $f$
+		\item Οι παίκτες παρέχουν στο $C$ τις εισόδους
+		\item Mαθαίνουν το αποτέλεσμα χωρίς να αποκαλυφθεί οποιαδήποτε ενδιάμεση τιμή ή είσοδος
+	\end{itemize}
+	\begin{block}{Βασική ιδέα}
+		Κατασκευή αλλοιωμένων πινάκων τιμών για τις λογικές πύλες του κυκλώματος με χρήση $OT$ 
+	\end{block}
+\end{frame}
+
+\begin{frame}{Παράδειγμα: Πύλη OR}
+	\begin{columns}
+		\column{0.5\textwidth}
+		\begin{itemize}
+			\item Υπολογισμός $x = s$ $\mathtt{OR}$ $r$
+			\item O $S$ παρέχει το $s$
+			\item O $R$ παρέχει το $r$
+		\end{itemize}
+		\column{0.5\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=\textwidth]{ot_or.png}
+			\caption{Αρχικός πίνακας υπολογισμού OR}			 
+		\end{figure}
+	\end{columns}	
+\end{frame}
+
+\begin{frame}{Παράδειγμα: Garbled OR}
+	\begin{columns}
+		\column{0.55\textwidth}
+		\begin{itemize}
+			\item Επιλογή δύο τυχαίων μεταθέσεων $v_s, v_r : \{0,1\} \rightarrow \{0,1\} $ 
+			\item Εφαρμογή στον πίνακα
+			\item Επιλογή 4 ζευγών συναρτήσεων κρυπτογράφησης και αποκρυπτογράφησης 
+			$(E_0^S, D_0^S), (E_1^S, D_1^S), (E_0^R, D_0^R), (E_1^R, D_1^R)$
+			\item Εφαρμογή στο αποτέλεσμα της μετάθεσης
+			\item Αποστολή στον $R$ μαζί με τη $v_r$
+		\end{itemize}
+		\column{0.45\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=1.2\textwidth]{ot_garbled_or.png}
+			\caption{Αλλοιωμένος πίνακας υπολογισμού OR}
+		\end{figure}
+	\end{columns}	
+\end{frame}
+
+\begin{frame}{Υπολογισμός με Garbled OR}
+	\begin{itemize}
+		\item Ο $S$ υπολογίζει το $v_s(s)$ 
+		\item Στέλνει στον $R$ το ζεύγος $(v_s(s),D_{v_s}^{S}(s))$
+		\item O $R$ υπολογίζει το $v_r(r)$
+		\item Για να αποκρυπτογραφήσει χρειάζεται την συνάρτηση $D_{(v_r(r))}^R$
+		\item Πρέπει να την πάρει από τον $S$ \alert{χωρίς} να αποκαλυφθεί το $v_r(r)$
+		\item Χρήση ${OT}_1^2(S,R,D_0^R,D_1^R)$
+		\item Τελικά ο $R$ μπορεί να υπολογίσει το αποτέλεσμα $D^R_{v_r(r)}(D^S_{v_s(s)}(E^S_{v_s(s)}(E^R_{v_r(r)}(x))))$ και να το επιστρέψει στον $S$.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Γενίκευση}
+	 
+	\begin{itemize}
+		\item Αλλοίωση όλων των πυλών
+		\item Για κάθε πύλη
+		\begin{itemize}
+			\item  Mετάθεση γραμμών πίνακα αλήθειας $\rightarrow$ τυχαία μετάθεση αποτελέσματος
+			\item  Θεώρουμε αποτέλεσμα και εισόδους ως τυχαία κλειδιά
+			\item  Χρειάζονται 6 κλειδιά (4 είσοδοι - 2 αποτέλεσμα)
+			\item  Υπολογισμός πύλης: γνώση κλειδιού αποτελέσματος
+			\item  Τροφοδοσία επόμενης
+		\end{itemize}		
+		\item Οι τελικές έξοδοι αποκρυπτογραφούνται
+	\end{itemize}
+	 
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Βιβλιογραφία}
+
+\begin{tiny}
+\begin{enumerate}
+\item St. Zachos and Aris Pagourtzis. Στοιχεία Θεωρίας Αριθμών και Εφαρμογές στην Κρυπτογραφία. Πανεπιστημιακές Σημειώσεις
+\item Jonathan Katz and Yehuda Lindell. Introduction to Modern Cryptography 2nd edition,  Chapman and Hall/CRC, 2015
+\item M. Ben-Or, S. Goldwasser and A. Wigderson, “Completeness Theorems for Non-Cryptographic Fault-Tolerant Distributed Computation,” Proceedings of the 20th Annual ACM Symposium on Theory of Computing, Chicago, 1988, pp. 1-10.
+\item Yao, A. C.  "Protocols for secure computations“ (FOCS 1982): 160–164
+\item Rabin M. O. "How to exchange secrets by oblivious transfer." ,TR-81, Harvard University, 1981
+\item S. Even, O. Goldreich, and A. Lempel. 1985. A randomized protocol for signing contracts. Commun. ACM 28, 6 (June 1985), 637-647
+\item Claude Crépeau. 1987. Equivalence Between Two Flavours of Oblivious Transfers. In A Conference on the Theory and Applications of Cryptographic Techniques on Advances in Cryptology (CRYPTO '87, UK, 350-354.
+\item Yehuda Lindell and Benny Pinkas. 2009. A Proof of Security of Yao’s Protocol for Two-Party Computation. J. Cryptol. 22, 2 (April 2009), 161-188
+Ostrofski R., CS 282A/MATH 209A: Foundations of Cryptography, Lecture 10, Oblivious Transfer
+\item Gabriel Bender, \href{http://www.math.uchicago.edu/~may/VIGRE/VIGRE2006/PAPERS/Bender.pdf}{Cryptography and Secure Two-Party Computation}, August 21, 2006
+\item Ronald Cramer, Ivan Damgård, Jesper Buus Nielsen \href{https://pdfs.semanticscholar.org/6ae2/38ab990dd0c97fa972dc6087da7aaece4279.pdf}{Multiparty Computation, an Introduction} 
+\end{enumerate}
+\end{tiny}
+\end{frame}
+
+\end{document}
